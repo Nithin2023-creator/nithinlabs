@@ -12,6 +12,7 @@ const EMAIL = 'hello@nithinlabs.com';
 const PHONE = '+91 90000 00000';
 const PHONE_TEL = '+919000000000';
 const CITY = 'Hyderabad, Telangana';
+const ASSET_VERSION = Date.now().toString(36);
 
 const ICON_PATHS = {
   users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -77,7 +78,7 @@ function tippedFlask() {
 const PILLARS = [
   { key: 'grow', num: '01', title: 'Grow & Retain', blurb: 'Bring customers back.' },
   { key: 'sell', num: '02', title: 'Sell', blurb: 'Sites, stores, counters.' },
-  { key: 'money', num: '03', title: 'Money', blurb: 'GST, UPI, books.' },
+  { key: 'money', num: '03', title: 'Money', blurb: 'Billing, UPI, books.' },
   { key: 'operate', num: '04', title: 'Operate', blurb: 'Stock, ERP, people.' },
   { key: 'build', num: '05', title: 'Build & Run', blurb: 'Apps, hosting, AMC.' },
 ];
@@ -89,12 +90,12 @@ const SERVICES = [
   { slug: 'ai-chatbots', pillar: 'grow', icon: 'bot', name: 'AI Chatbots & Support Desk', short: '24×7 answers, with a human when needed.', tags: 'ai chatbot support helpdesk tickets', features: ['Website and WhatsApp bots', 'Answers from your FAQ', 'Ticket and SLA tracking', 'Live-agent handoff', 'Multilingual replies', 'Conversation analytics'], outcomes: ['Always-on first response', 'Fewer repetitive queries', 'Clean support history'], timeline: '3–5 weeks', stack: 'LLM + helpdesk' },
   { slug: 'brand-websites', pillar: 'sell', icon: 'globe', name: 'Brand Websites', short: 'Fast sites that turn visitors into leads.', tags: 'website design brand landing cms', features: ['Custom design', 'Mobile-first performance', 'Easy content edits', 'Lead forms', 'On-page SEO', 'Analytics'], outcomes: ['Stronger first impression', 'More qualified leads', 'A site you can update'], timeline: '3–6 weeks', stack: 'Static / headless CMS' },
   { slug: 'ecommerce', pillar: 'sell', icon: 'cart', name: 'E-commerce & Online Stores', short: 'Catalogue, cart and UPI checkout.', tags: 'ecommerce store shop online d2c checkout', features: ['Catalogue with variants', 'UPI and card checkout', 'Stock sync', 'Order workflows', 'Coupons and cart recovery', 'COD controls'], outcomes: ['New online revenue', 'One stock count', 'India-ready checkout'], timeline: '6–10 weeks', stack: 'Shopify / custom' },
-  { slug: 'pos', pillar: 'sell', icon: 'scan', name: 'POS & Counter Billing', short: 'Barcode billing, printers and GST receipts.', tags: 'pos counter billing barcode retail restaurant', features: ['Barcode and quick search', 'Thermal printers', 'Multi-counter stores', 'Cash, UPI and card', 'Offline-friendly', 'Day-end reports'], outcomes: ['Shorter queues', 'Accurate daily sales', 'GST-ready receipts'], timeline: '3–6 weeks', stack: 'Web / Android POS' },
+  { slug: 'pos', pillar: 'sell', icon: 'scan', name: 'POS & Counter Billing', short: 'Barcode billing, printers and tax-ready receipts.', tags: 'pos counter billing barcode retail restaurant', features: ['Barcode and quick search', 'Thermal printers', 'Multi-counter stores', 'Cash, UPI and card', 'Offline-friendly', 'Day-end reports'], outcomes: ['Shorter queues', 'Accurate daily sales', 'Tax-ready receipts'], timeline: '3–6 weeks', stack: 'Web / Android POS' },
   { slug: 'booking', pillar: 'sell', icon: 'calendar', name: 'Booking & Appointments', short: 'Calendars, deposits and no-show reminders.', tags: 'booking appointment calendar clinic salon', features: ['Online booking pages', 'Staff calendars', 'SMS and WhatsApp reminders', 'Advance payments', 'Packages', 'No-show tracking'], outcomes: ['Fewer no-shows', 'Fuller schedules', 'Less phone tag'], timeline: '3–5 weeks', stack: 'Custom + payments' },
-  { slug: 'billing', pillar: 'money', icon: 'receipt', name: 'GST Billing & Invoicing', short: 'GST invoices, e-invoice and e-way bills.', tags: 'gst billing invoice e-invoice eway tax', features: ['Tax invoices and notes', 'CGST, SGST, IGST', 'e-Invoice IRN and QR', 'e-Way bills', 'HSN summaries', 'GSTR-ready exports'], outcomes: ['Cleaner GST compliance', 'Faster invoicing', 'Less filing rework'], timeline: '3–6 weeks', stack: 'GSP / IRP APIs' },
+  { slug: 'billing', pillar: 'money', icon: 'receipt', name: 'Billing & Invoicing', short: 'Invoices, credit notes and tax-ready exports.', tags: 'billing invoice e-invoice eway tax gst', features: ['Tax invoices and notes', 'Multi-tax breakup', 'Digital invoice QR', 'Dispatch documents', 'Item code summaries', 'Return-ready exports'], outcomes: ['Cleaner compliance', 'Faster invoicing', 'Less filing rework'], timeline: '3–6 weeks', stack: 'Billing APIs' },
   { slug: 'payment-gateways', pillar: 'money', icon: 'card', name: 'Payment Gateway Integration', short: 'UPI and cards via Razorpay, Cashfree and more.', tags: 'payment gateway upi razorpay cashfree phonepe payu autopay', features: ['Razorpay, Cashfree, PhonePe, PayU', 'Links and QR', 'Subscriptions and autopay', 'Refunds and settlements', 'Webhook reconciliation', 'Failed-payment retries'], outcomes: ['Fewer failed payments', 'Automated collections', 'Clear settlement trail'], timeline: '2–4 weeks', stack: 'Gateway APIs' },
-  { slug: 'accounting', pillar: 'money', icon: 'calculator', name: 'Accounting & Tally Sync', short: 'Sales and GST flowing into your books.', tags: 'accounting tally books ledger expenses', features: ['Tally sync', 'Ledger mapping', 'Expense capture', 'Ageing reports', 'Bank matching', 'CA exports'], outcomes: ['No double entry', 'Faster month-end', 'Books that match ops'], timeline: '2–4 weeks', stack: 'Tally XML / APIs' },
-  { slug: 'inventory', pillar: 'operate', icon: 'box', name: 'Inventory & Warehouse', short: 'Live stock, batches, barcodes, multi-branch.', tags: 'inventory stock warehouse godown barcode batch expiry', features: ['Item master with HSN', 'Batch and expiry', 'Barcode labels', 'Multi-warehouse', 'Low-stock alerts', 'Valuation reports'], outcomes: ['Fewer stockouts', 'Less dead stock', 'Stock you trust'], timeline: '4–8 weeks', stack: 'Custom + scanners' },
+  { slug: 'accounting', pillar: 'money', icon: 'calculator', name: 'Accounting & Tally Sync', short: 'Sales and tax flowing into your books.', tags: 'accounting tally books ledger expenses', features: ['Tally sync', 'Ledger mapping', 'Expense capture', 'Ageing reports', 'Bank matching', 'CA exports'], outcomes: ['No double entry', 'Faster month-end', 'Books that match ops'], timeline: '2–4 weeks', stack: 'Tally XML / APIs' },
+  { slug: 'inventory', pillar: 'operate', icon: 'box', name: 'Inventory & Warehouse', short: 'Live stock, batches, barcodes, multi-branch.', tags: 'inventory stock warehouse godown barcode batch expiry', features: ['Item master with SKUs', 'Batch and expiry', 'Barcode labels', 'Multi-warehouse', 'Low-stock alerts', 'Valuation reports'], outcomes: ['Fewer stockouts', 'Less dead stock', 'Stock you trust'], timeline: '4–8 weeks', stack: 'Custom + scanners' },
   { slug: 'erp', pillar: 'operate', icon: 'layers', name: 'Custom ERP', short: 'Modules shaped around your process.', tags: 'erp custom software process modules', features: ['Discovery workshops', 'Phased rollout', 'Role-based access', 'Approvals', 'Manager reports', 'Integrations'], outcomes: ['One system of record', 'Fewer spreadsheets', 'Processes that scale'], timeline: 'Phased', stack: 'Custom' },
   { slug: 'hr-payroll', pillar: 'operate', icon: 'briefcase', name: 'HR & Payroll', short: 'Attendance, salary, PF, ESI and TDS.', tags: 'hr payroll attendance pf esi tds salary', features: ['Attendance and leave', 'Salary structures', 'PF, ESI, PT, TDS', 'Payslips', 'Reimbursements', 'Statutory reports'], outcomes: ['On-time payroll', 'Lower compliance risk', 'Fewer HR queries'], timeline: '3–6 weeks', stack: 'Custom' },
   { slug: 'analytics', pillar: 'operate', icon: 'chart', name: 'Analytics Dashboards', short: 'Sales, stock and collections at a glance.', tags: 'analytics dashboard reports kpi data', features: ['Sales and margin views', 'Collection ageing', 'SKU and branch KPIs', 'Custom metrics', 'Scheduled emails', 'Mobile views'], outcomes: ['Faster decisions', 'Leaks spotted early', 'One version of truth'], timeline: '2–5 weeks', stack: 'Metabase / custom' },
@@ -106,14 +107,36 @@ const SERVICES = [
 
 const bySlug = Object.fromEntries(SERVICES.map((s) => [s.slug, s]));
 
+const TAG_LABELS = {
+  'customer-retention': 'Retention',
+  'whatsapp-automation': 'WhatsApp',
+  'digital-marketing': 'Marketing',
+  'ai-chatbots': 'AI support',
+  'brand-websites': 'Website',
+  ecommerce: 'E-commerce',
+  pos: 'POS',
+  booking: 'Booking',
+  billing: 'Billing',
+  'payment-gateways': 'Payments',
+  accounting: 'Accounting',
+  inventory: 'Inventory',
+  erp: 'Custom ERP',
+  'hr-payroll': 'Payroll',
+  analytics: 'Analytics',
+  'mobile-apps': 'Mobile app',
+  'cloud-hosting': 'Hosting',
+  maintenance: 'AMC',
+  cybersecurity: 'Security',
+};
+
 const INDUSTRIES = [
   { id: 'retail', name: 'Retail & Kirana', short: 'POS · barcode · UPI', text: 'Counter billing, barcode stock, UPI and loyalty.', stack: ['pos', 'inventory', 'customer-retention'] },
   { id: 'restaurants', name: 'Restaurants & Cafés', short: 'Billing · menu · ordering', text: 'Fast billing, ingredient stock and WhatsApp updates.', stack: ['pos', 'ecommerce', 'whatsapp-automation'] },
-  { id: 'pharma', name: 'Pharma & Medical', short: 'Batch · expiry · GST', text: 'Batch/expiry tracking and schedule-aware billing.', stack: ['inventory', 'billing', 'analytics'] },
+  { id: 'pharma', name: 'Pharma & Medical', short: 'Batch · expiry · billing', text: 'Batch/expiry tracking and schedule-aware billing.', stack: ['inventory', 'billing', 'analytics'] },
   { id: 'clinics', name: 'Clinics & Diagnostics', short: 'Booking · reminders', text: 'Appointments, deposits and no-show reminders.', stack: ['booking', 'payment-gateways', 'whatsapp-automation'] },
   { id: 'salons', name: 'Salons & Wellness', short: 'Booking · packages', text: 'Staff calendars, packages and digital payments.', stack: ['booking', 'customer-retention', 'payment-gateways'] },
-  { id: 'distributors', name: 'Distributors & Wholesale', short: 'Multi-godown · e-way', text: 'Multi-warehouse stock, B2B prices and e-way bills.', stack: ['inventory', 'billing', 'accounting'] },
-  { id: 'manufacturing', name: 'Manufacturing', short: 'Materials · dispatch', text: 'Materials, job visibility and GST dispatch.', stack: ['erp', 'inventory', 'billing'] },
+  { id: 'distributors', name: 'Distributors & Wholesale', short: 'Multi-godown · B2B', text: 'Multi-warehouse stock, B2B prices and dispatch docs.', stack: ['inventory', 'billing', 'accounting'] },
+  { id: 'manufacturing', name: 'Manufacturing', short: 'Materials · dispatch', text: 'Materials, job visibility and invoice-ready dispatch.', stack: ['erp', 'inventory', 'billing'] },
   { id: 'education', name: 'Education & Coaching', short: 'Fees · admissions', text: 'Fee collection, admissions and parent updates.', stack: ['payment-gateways', 'customer-retention', 'brand-websites'] },
 ];
 
@@ -141,7 +164,7 @@ function pillarVisual(key) {
       <div class="viz-tick">${icon('check')}</div>
     </div>`,
     operate: `<div class="viz viz-operate" data-visual="operate" aria-hidden="true">
-      <span style="--h:40%"></span><span style="--h:70%"></span><span style="--h:55%"></span><span style="--h:85%"></span><span style="--h:45%"></span>
+      <span style="--h:22px"></span><span style="--h:38px"></span><span style="--h:28px"></span><span style="--h:44px"></span><span style="--h:24px"></span>
     </div>`,
     build: `<div class="viz viz-build" data-visual="build" aria-hidden="true">
       <div class="viz-phone"></div>
@@ -153,41 +176,59 @@ function pillarVisual(key) {
 }
 
 function systemHub() {
+  // Orbit geometry matches live nithinlabs.com (viewBox 550×570, centre 275,285)
+  const cx = 275;
+  const cy = 285;
   const nodes = [
-    { id: 'billing', label: 'Billing', x: 280, y: 48, tip: 'GST invoice on every sale' },
-    { id: 'stock', label: 'Stock', x: 340, y: 160, tip: 'Inventory adjusts live' },
-    { id: 'payments', label: 'Payments', x: 280, y: 272, tip: 'UPI settles and reconciles' },
-    { id: 'crm', label: 'CRM', x: 40, y: 272, tip: 'Loyalty and follow-ups fire' },
-    { id: 'website', label: 'Website', x: 40, y: 48, tip: 'Orders land in the same stack' },
+    { id: 'billing', label: 'Billing', tip: 'Invoice on every sale', nx: 275, ny: 88, lx: 230, ly: 28, violet: false },
+    { id: 'stock', label: 'Stock', tip: 'Inventory adjusts live', nx: 472, ny: 285, lx: 460, ly: 268, violet: true },
+    { id: 'payments', label: 'Payments', tip: 'UPI settles and reconciles', nx: 275, ny: 482, lx: 220, ly: 500, violet: false },
+    { id: 'crm', label: 'CRM', tip: 'Loyalty and follow-ups fire', nx: 78, ny: 285, lx: 8, ly: 268, violet: true },
+    { id: 'website', label: 'Website', tip: 'Orders land in the same stack', nx: 413, ny: 146, lx: 390, ly: 98, violet: true },
   ];
-  const cx = 190;
-  const cy = 160;
-  return `<div class="hub" data-hub>
-    <svg class="hub-svg" viewBox="0 0 380 320" role="img" aria-label="Connected system: billing, stock, payments, CRM and website around Nithinlabs">
+  return `<div class="hub orbit-hub frame" data-hub>
+    <span class="art-corner top">FIG. 02 / CONNECTED STACK</span>
+    <div class="orbit-stage">
+    <svg class="orbit-svg hub-svg" viewBox="0 0 550 570" role="img" aria-label="Connected system: billing, stock, payments, CRM and website around Nithinlabs">
+      <circle cx="${cx}" cy="${cy}" r="196" class="orbit"/>
+      <circle cx="${cx}" cy="${cy}" r="142" class="orbit-dash"/>
+      <circle cx="${cx}" cy="${cy}" r="98" class="orbit"/>
+      <path d="M275 88V187 M472 285H373 M275 482V383 M78 285H177" class="connector"/>
+      <path d="M136 146L207 217 M413 146L343 217 M413 424L343 353 M136 424L207 353" class="connector"/>
+      <circle cx="275" cy="88" r="7" class="node" data-orbit-node="billing"/>
+      <circle cx="472" cy="285" r="7" class="node-violet" data-orbit-node="stock"/>
+      <circle cx="275" cy="482" r="7" class="node" data-orbit-node="payments"/>
+      <circle cx="78" cy="285" r="7" class="node-violet" data-orbit-node="crm"/>
+      <circle cx="136" cy="146" r="4" class="node"/>
+      <circle cx="413" cy="146" r="4" class="node-violet" data-orbit-node="website"/>
+      <circle cx="413" cy="424" r="4" class="node"/>
+      <circle cx="136" cy="424" r="4" class="node-violet"/>
+      <path d="M260 48h30 M275 33v30 M491 271v28 M58 271v28 M260 522h30" class="connector"/>
       ${nodes
         .map(
           (n) =>
-            `<line class="hub-link" data-link="${n.id}" x1="${cx}" y1="${cy}" x2="${n.x + 40}" y2="${n.y + 18}" />`
+            `<line class="hub-link connector" data-link="${n.id}" x1="${cx}" y1="${cy}" x2="${n.nx}" y2="${n.ny}" />`
         )
         .join('\n      ')}
-      <g class="hub-core">
-        <circle cx="${cx}" cy="${cy}" r="42" class="hub-core-ring"/>
-        <g transform="translate(${cx - 14}, ${cy - 14}) scale(1.15)">
-          <path d="M9 3h6M10 3v5.5L5.2 17.2A3.5 3.5 0 0 0 8.3 22h7.4a3.5 3.5 0 0 0 3.1-4.8L14 8.5V3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M7.2 16.5h9.6" fill="none" stroke="currentColor" stroke-width="1.4"/>
-        </g>
-      </g>
       ${nodes
         .map(
-          (n) => `<g class="hub-node" data-node="${n.id}" tabindex="0" aria-label="${n.label}: ${n.tip}" transform="translate(${n.x}, ${n.y})">
+          (n) => `<g class="hub-node" data-node="${n.id}" tabindex="0" aria-label="${n.label}: ${n.tip}" transform="translate(${n.lx}, ${n.ly})">
         <title>${n.label}: ${n.tip}</title>
-        <rect width="80" height="36" rx="8" />
-        <text x="40" y="23" text-anchor="middle">${n.label}</text>
+        <rect width="90" height="34" rx="6" />
+        <text x="45" y="22" text-anchor="middle">${n.label}</text>
       </g>`
         )
         .join('\n      ')}
     </svg>
-    <p class="hub-tip" data-hub-tip>Hover a node — or ring up a sale above.</p>
+    <div class="orbit-center">
+      ${flaskMark()}
+      <span class="caption">nithinlabs / core</span>
+    </div>
+    </div>
+    <div class="orbit-foot">
+      <span class="art-corner bottom">SALE → STOCK → INVOICE → PAYMENT</span>
+      <p class="hub-tip" data-hub-tip>Hover a node — or ring up a sale above.</p>
+    </div>
   </div>`;
 }
 
@@ -212,7 +253,7 @@ function head({ title, description, depth = 0, pagePath }) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="${rel(depth, 'assets/css/styles.css')}">
+  <link rel="stylesheet" href="${rel(depth, 'assets/css/styles.css')}?v=${ASSET_VERSION}">
   <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -260,7 +301,7 @@ function footer(depth) {
         </div>
         <div class="footer-col">
           <h4>Services</h4>
-          <a href="${l('services/billing.html')}">GST Billing</a>
+          <a href="${l('services/billing.html')}">Billing</a>
           <a href="${l('services/inventory.html')}">Inventory</a>
           <a href="${l('services/payment-gateways.html')}">Payment Gateways</a>
           <a href="${l('services/brand-websites.html')}">Brand Websites</a>
@@ -292,10 +333,20 @@ function footer(depth) {
     </div>
     <p class="wordmark" aria-hidden="true">nithinlabs</p>
   </footer>
-  <script src="${rel(depth, 'assets/js/main.js')}" defer></script>
+  <script src="${rel(depth, 'assets/js/scroll.js')}?v=${ASSET_VERSION}" defer></script>
+  <script src="${rel(depth, 'assets/js/main.js')}?v=${ASSET_VERSION}" defer></script>
 </body>
 </html>
 `;
+}
+
+function mobileCta(depth) {
+  const l = (f) => rel(depth, f);
+  return `
+  <aside class="mobile-cta" aria-label="Quick contact" data-mobile-cta hidden>
+    <a class="mobile-cta-call" href="${l('contact.html')}">Book a free call</a>
+    <a class="mobile-cta-wa" href="https://wa.me/${PHONE_TEL.slice(1)}" aria-label="WhatsApp us" target="_blank" rel="noopener noreferrer">${icon('message')}</a>
+  </aside>`;
 }
 
 function pageHero({ depth, crumbs, kicker, title, lead, extra = '' }) {
@@ -360,7 +411,7 @@ const orgJsonLd = `
     telephone: PHONE,
     address: { '@type': 'PostalAddress', addressLocality: 'Hyderabad', addressRegion: 'Telangana', addressCountry: 'IN' },
     areaServed: 'IN',
-    description: 'IT solutions for Indian SMBs: GST billing, inventory, payment gateways, brand websites and customer retention.',
+    description: 'IT solutions for Indian SMBs: billing, inventory, payment gateways, brand websites and customer retention.',
   })}</script>`;
 
 const pages = [];
@@ -378,7 +429,7 @@ const marqueeGroup = (hidden) =>
 const demoSteps = [
   ['Sale recorded', 'Waiting', 'billing'],
   ['Stock updated', '', 'stock'],
-  ['GST invoice generated', '', 'billing'],
+  ['Invoice generated', '', 'billing'],
   ['Payment received', '', 'payments'],
   ['Customer notified', '', 'crm'],
 ];
@@ -390,30 +441,30 @@ write(
   'index.html',
   head({
     title: 'Nithinlabs | Billing, inventory, payments and websites for Indian SMBs',
-    description: 'Nithinlabs builds GST billing, inventory, payment gateway, website and retention systems for Indian SMBs — one connected stack.',
+    description: 'Nithinlabs builds billing, inventory, payment gateway, website and retention systems for Indian SMBs — one connected stack.',
     pagePath: 'index.html',
   }) +
     header(0, 'home') +
     `
   <main id="main">
-    <section class="hero" data-hero>
+    <section class="hero blueprint" data-hero data-scroll data-scroll-parallax="0.15">
       <div class="container hero-grid">
-        <div>
-          <a class="announce" href="contact.html"><span class="announce-tag">Open</span> New projects · Q1 2027 ${icon('arrow', 'icon icon-sm')}</a>
+        <div data-scroll data-scroll-lift>
+          <div class="hero-kicker"><span class="pulse" aria-hidden="true"></span> BILLING · PAYMENTS · RETENTION</div>
           <h1 aria-label="${HEADLINE}">${splitHeadline(HEADLINE)}</h1>
-          <p class="hero-sub">GST billing, stock, UPI payments and retention — built and run as one stack.</p>
+          <p class="hero-sub">Billing, stock, UPI payments and retention — built and run as one stack.</p>
           <div class="btn-row">
             <a class="btn btn-primary" data-magnetic href="contact.html">Book a free call ${icon('arrow')}</a>
             <a class="btn btn-outline" href="services.html">All services</a>
           </div>
           <ul class="hero-points">
-            <li>${icon('check')} GST &amp; e-invoice</li>
+            <li>${icon('check')} Invoices &amp; compliance</li>
             <li>${icon('check')} UPI gateways</li>
             <li>${icon('check')} Fixed-price scopes</li>
           </ul>
         </div>
 
-        <div class="demo" data-demo data-reveal>
+        <div class="demo" data-demo data-reveal data-scroll data-scroll-lift>
           <div class="demo-top">
             ${flaskMark('logo-mark-sm')}
             <span>Nithinlabs Lab · Counter 01</span>
@@ -426,7 +477,7 @@ write(
               <div><span class="m-label">Invoices</span><span class="m-value" data-demo-invoices>41</span></div>
             </div>
             <div class="demo-item">
-              <div><strong>Basmati Rice · 5 kg</strong><span>HSN 1006 · GST 5%</span></div>
+              <div><strong>Basmati Rice · 5 kg</strong><span>SKU 1006 · Tax 5%</span></div>
               <span class="demo-price">₹649</span>
             </div>
             <ol class="demo-log">
@@ -486,14 +537,41 @@ write(
       </div>
     </section>
 
-    <section class="section" data-section>
-      <div class="container">
-        <div class="sec-head" data-reveal>
-          <span class="kicker">02 / Connected</span>
-          <h2>One sale updates everything.</h2>
-          <p>Ring up a sale above — watch the matching line pulse here.</p>
+    <section class="section blueprint story-section" data-section data-story data-scroll data-scroll-steps="5">
+      <div class="story-pin">
+        <div class="container connected-grid">
+          <div class="connected-visual" data-reveal>${systemHub()}</div>
+          <div class="connected-copy" data-reveal>
+            <span class="kicker">02 / Connected</span>
+            <h2>One sale updates everything.</h2>
+            <p class="connected-lead">No re-typing between tools. Every module reads and writes the same data, so a single sale moves through your whole business in seconds.</p>
+            <ol class="flow-list" tabindex="0" aria-label="How one sale updates the connected stack">
+              ${[
+                ['billing', 'Billing', 'Invoice is generated the moment the sale closes.'],
+                ['stock', 'Stock', 'Inventory drops live across every counter and branch.'],
+                ['payments', 'Payments', 'UPI or card settles and reconciles automatically.'],
+                ['crm', 'CRM', 'Loyalty points and follow-ups fire on their own.'],
+                ['website', 'Website', 'Online orders land in the same stack, same stock.'],
+              ]
+                .map(
+                  ([id, title, text], i) => `<li class="flow-item" data-flow="${id}" data-story-step="${id}">
+                <span class="flow-num">${String(i + 1).padStart(2, '0')}</span>
+                <div><strong>${title}</strong><p>${text}</p></div>
+              </li>`
+                )
+                .join('\n              ')}
+            </ol>
+            <div class="flow-dots" aria-hidden="true" data-flow-dots>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="orbit-labels">
+              <span class="art-label"><i></i>SECURE BY DESIGN</span>
+              <span class="art-label violet"><i></i>ONE DATA LAYER</span>
+              <span class="art-label violet"><i></i>FULL STACK</span>
+              <span class="art-label"><i></i>BUILT TO BE USEFUL</span>
+            </div>
+          </div>
         </div>
-        <div data-reveal>${systemHub()}</div>
       </div>
     </section>
 
@@ -505,17 +583,18 @@ write(
           <p>Same blocks. Configured for your trade.</p>
         </div>
         <ul class="ind-list" data-reveal>
-          ${INDUSTRIES.map(
-            (ind, i) => `<li>
-            <a class="ind-row" href="industries.html#${ind.id}">
-              <span class="ind-num">${String(i + 1).padStart(2, '0')}</span>
-              <span class="ind-name">${ind.name}</span>
-              <span class="ind-desc">${ind.short}</span>
-              <span class="ind-preview">${ind.stack.map((slug) => bySlug[slug].name.split('&')[0].trim()).join(' · ')}</span>
+          ${INDUSTRIES.map((ind, i) => {
+            const tags = ind.stack.map((slug) => TAG_LABELS[slug] || bySlug[slug].name.split('&')[0].trim());
+            return `<li>
+            <a class="expertise-row" href="industries.html#${ind.id}">
+              <span class="expertise-num">${String(i + 1).padStart(2, '0')}</span>
+              <span class="expertise-title">${ind.name}</span>
+              <span class="expertise-desc">${ind.short}</span>
+              <span class="tag-list">${tags.map((t) => `<span class="tag">${t}</span>`).join('')}</span>
               ${icon('arrow')}
             </a>
-          </li>`
-          ).join('\n          ')}
+          </li>`;
+          }).join('\n          ')}
         </ul>
       </div>
     </section>
@@ -529,24 +608,28 @@ write(
         </div>
         <!-- PLACEHOLDER: replace stats with verified data before publishing -->
         <div class="stats" data-reveal>
-          <div class="stat">
-            <div class="stat-value" data-count="50" data-suffix="+">50+</div>
-            <div class="stat-label">Projects*</div>
+          <div class="door frame">
+            <span class="door-label">PROJECTS</span>
+            <div class="door-value" data-count="50" data-suffix="+">50+</div>
+            <span class="door-caption">Shipped for SMBs* ${icon('arrow')}</span>
             <svg class="spark" viewBox="0 0 80 24" aria-hidden="true"><path d="M0 18 12 14 24 16 36 8 48 12 60 4 80 10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           </div>
-          <div class="stat">
-            <div class="stat-value" data-count="15" data-suffix="+">15+</div>
-            <div class="stat-label">Industries*</div>
+          <div class="door frame">
+            <span class="door-label">INDUSTRIES</span>
+            <div class="door-value" data-count="15" data-suffix="+">15+</div>
+            <span class="door-caption">Configured stacks* ${icon('arrow')}</span>
             <svg class="spark" viewBox="0 0 80 24" aria-hidden="true"><path d="M0 16 16 12 32 14 48 6 64 10 80 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           </div>
-          <div class="stat">
-            <div class="stat-value" data-count="98" data-suffix="%">98%</div>
-            <div class="stat-label">On-time*</div>
+          <div class="door frame">
+            <span class="door-label">ON-TIME</span>
+            <div class="door-value" data-count="98" data-suffix="%">98%</div>
+            <span class="door-caption">Delivery record* ${icon('arrow')}</span>
             <svg class="spark" viewBox="0 0 80 24" aria-hidden="true"><path d="M0 20 20 18 40 10 60 8 80 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           </div>
-          <div class="stat">
-            <div class="stat-value" data-count="4" data-suffix="h">4h</div>
-            <div class="stat-label">AMC response*</div>
+          <div class="door frame">
+            <span class="door-label">AMC RESPONSE</span>
+            <div class="door-value" data-count="4" data-suffix="h">4h</div>
+            <span class="door-caption">Support SLA* ${icon('arrow')}</span>
             <svg class="spark" viewBox="0 0 80 24" aria-hidden="true"><path d="M0 12 16 10 32 14 48 6 64 8 80 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           </div>
         </div>
@@ -566,7 +649,7 @@ write(
           ${[
             ['Product or services firm?', 'Services. We design, build, integrate and support the right stack for you — custom, configured tools, or both.'],
             ['Razorpay, Cashfree, PhonePe, PayU?', 'Yes. Checkout, links, QR, subscriptions and webhook reconciliation. Funds settle with your RBI-authorised gateway.'],
-            ['GST and e-invoice?', 'Yes: CGST/SGST/IGST, HSN, credit notes, and e-invoice / e-way where required.'],
+            ['Do you handle tax invoices?', 'Yes — tax breakup, credit notes, and e-invoice / e-way where your business needs them.'],
             ['How long?', 'Billing + payments: often 3–6 weeks. Larger work is phased so phase one ships value early.'],
           ]
             .map(([q, a]) => `<details><summary>${q}<span class="faq-plus" aria-hidden="true"></span></summary><div class="faq-body">${a}</div></details>`)
@@ -579,6 +662,7 @@ write(
     `
   </main>` +
     orgJsonLd +
+    mobileCta(0) +
     footer(0)
 );
 
@@ -587,7 +671,7 @@ write(
   'services.html',
   head({
     title: 'Services | Nithinlabs',
-    description: 'Nithinlabs services: retention, websites, GST billing, inventory, payment gateways, ERP, apps and more.',
+    description: 'Nithinlabs services: retention, websites, billing, inventory, payment gateways, ERP, apps and more.',
     pagePath: 'services.html',
   }) +
     header(0, 'services') +
@@ -604,7 +688,7 @@ write(
           <div class="filter">
             <label class="sr-only" for="service-filter">Filter services</label>
             ${icon('search')}
-            <input id="service-filter" type="search" placeholder="Try “GST”, “UPI”, “stock”…" autocomplete="off">
+            <input id="service-filter" type="search" placeholder="Try “billing”, “UPI”, “stock”…" autocomplete="off">
           </div>
           <span class="filter-count" data-filter-count aria-live="polite"></span>
         </div>`,
@@ -751,7 +835,7 @@ write(
 
 /* ---------- Case studies ---------- */
 const CASES = [
-  { title: 'Multi-store retail, one stock count', problem: 'Three outlets. Stock never matched settlements.', approach: 'Shared POS + inventory with GST and Razorpay webhooks.', stack: ['pos', 'inventory', 'payment-gateways'] },
+  { title: 'Multi-store retail, one stock count', problem: 'Three outlets. Stock never matched settlements.', approach: 'Shared POS + inventory with Razorpay webhooks.', stack: ['pos', 'inventory', 'payment-gateways'] },
   { title: 'Distributor collections on autopilot', problem: '60+ day receivables chased by phone.', approach: 'e-Invoice billing, ageing and WhatsApp payment links.', stack: ['billing', 'whatsapp-automation', 'analytics'] },
   { title: 'Clinic bookings without phone tag', problem: 'Front desk buried in calls. High no-shows.', approach: 'Online booking, deposits and reminders.', stack: ['booking', 'payment-gateways', 'whatsapp-automation'] },
 ];
@@ -849,7 +933,7 @@ write(
 
 /* ---------- Contact ---------- */
 const MODULES = [
-  ['billing', 'GST Billing'],
+  ['billing', 'Billing'],
   ['inventory', 'Inventory'],
   ['payments', 'Payment Gateway'],
   ['pos', 'POS'],

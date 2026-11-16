@@ -6,10 +6,12 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
+const require = createRequire(import.meta.url);
 
 const REQUIRED_SERVICES = [
   'customer-retention',
@@ -378,6 +380,273 @@ describe('Brand, motion and tighter home', () => {
       /prefers-reduced-motion[\s\S]{0,400}animation[^;]*none|animation-duration:\s*0\.00?1ms/i,
       'reduced-motion should disable animations'
     );
+  });
+});
+
+describe('nithinlabs.com visual adoption', () => {
+  it('hero uses a mono kicker chip with pulse and no announce link', () => {
+    const html = read('index.html');
+    const hero = html.match(/<section[^>]+class=["'][^"']*hero[^"']*["'][\s\S]*?<\/section>/i);
+    assert.ok(hero, 'missing hero section');
+    assert.match(hero[0], /class=["'][^"']*hero-kicker[^"']*["']/i, 'missing .hero-kicker');
+    assert.match(hero[0], /class=["'][^"']*pulse[^"']*["']/i, 'missing .pulse inside hero');
+    assert.match(hero[0], /·/, 'kicker text should use · separators');
+    assert.doesNotMatch(hero[0], /class=["'][^"']*announce[^"']*["']/i, '.announce should be removed from hero');
+  });
+
+  it('orbit hub keeps interactive data-hub wiring with orbit SVG geometry', () => {
+    const html = read('index.html');
+    assert.match(html, /data-hub[\s>]/i, 'missing [data-hub]');
+    const hub = html.match(/<(?:div|svg)[^>]+data-hub[\s\S]*?<\/(?:div|svg)>/i);
+    assert.ok(hub, 'could not extract hub markup');
+    assert.match(hub[0], /<svg[^>]+class=["'][^"']*orbit-svg[^"']*["']/i, 'missing svg.orbit-svg');
+    assert.match(hub[0], /role\s*=\s*["']img["']/i, 'orbit svg needs role=img');
+    assert.match(hub[0], /aria-label\s*=\s*["'][^"']+["']/i, 'orbit svg needs aria-label');
+    const orbits = hub[0].match(/class=["'][^"']*\borbit\b[^"']*["']/gi) || [];
+    assert.ok(orbits.length >= 2, `expected >= 2 .orbit circles, found ${orbits.length}`);
+    assert.match(hub[0], /class=["'][^"']*orbit-dash[^"']*["']/i, 'missing .orbit-dash');
+    assert.match(hub[0], /class=["'][^"']*connector[^"']*["']/i, 'missing .connector');
+    for (const id of ['billing', 'stock', 'payments', 'crm', 'website']) {
+      assert.match(hub[0], new RegExp(`data-link=["']${id}["']`, 'i'), `missing data-link=${id}`);
+      assert.match(hub[0], new RegExp(`data-node=["']${id}["']`, 'i'), `missing data-node=${id}`);
+    }
+    const named = hub[0].match(/data-node(?:=["'][^"']+["'])?[^>]*(?:aria-label|title)=["'][^"']+["']/gi) || [];
+    assert.ok(named.length >= 5, 'each hub node needs an accessible name');
+    // orbit-center + art-corners sit beside the svg inside [data-hub]; lazy hub extract ends at </svg>
+    assert.match(html, /class=["'][^"']*orbit-center[^"']*["']/i, 'missing .orbit-center');
+    assert.match(html, /FIG\.\s*02/i, 'missing FIG. 02 art-corner caption');
+    assert.match(html, /SALE\s*→\s*STOCK|→/, 'missing flow caption with →');
+  });
+
+  it('industries list uses expertise rows with tags', () => {
+    const html = read('index.html');
+    const list = html.match(/<ul[^>]+class=["'][^"']*ind-list[^"']*["'][\s\S]*?<\/ul>/i);
+    assert.ok(list, 'missing .ind-list');
+    const rows = list[0].match(/class=["'][^"']*expertise-row[^"']*["']/gi) || [];
+    assert.equal(rows.length, 8, `expected 8 .expertise-row links, found ${rows.length}`);
+    const items = list[0].match(/<a[^>]+class=["'][^"']*expertise-row[^"']*["'][\s\S]*?<\/a>/gi) || [];
+    assert.equal(items.length, 8, 'could not extract expertise-row anchors');
+    for (const item of items) {
+      assert.match(item, /class=["'][^"']*expertise-num[^"']*["']/i, 'row needs .expertise-num');
+      const tags = item.match(/class=["'][^"']*\btag\b[^"']*["']/gi) || [];
+      assert.ok(tags.length >= 2, `row needs >= 2 .tag chips, found ${tags.length}`);
+      assert.match(item, /<svg[\s>]/i, 'row needs an arrow icon');
+    }
+  });
+
+  it('proof stats use door cards with count-up values', () => {
+    const html = read('index.html');
+    const stats = html.match(/<div[^>]+class=["'][^"']*\bstats\b[^"']*["'][\s\S]*?(?=<p class=["']placeholder-note|<section|<\/div>\s*<\/section>)/i);
+    assert.ok(stats, 'missing .stats block');
+    const doors = stats[0].match(/class=["'][^"']*\bdoor\b[^"']*["']/gi) || [];
+    assert.ok(doors.length >= 4, `expected >= 4 .door cards, found ${doors.length}`);
+    const cards = stats[0].match(/<(?:div|a)[^>]+class=["'][^"']*\bdoor\b[^"']*["'][\s\S]*?<\/(?:div|a)>/gi) || [];
+    assert.ok(cards.length >= 4, 'could not extract door cards');
+    for (const card of cards.slice(0, 4)) {
+      assert.match(card, /class=["'][^"']*door-label[^"']*["']/i, 'door needs .door-label');
+      assert.match(card, /class=["'][^"']*door-value[^"']*["'][^>]*data-count=/i, 'door needs .door-value[data-count]');
+    }
+    assert.match(html, /class=["'][^"']*placeholder-note[^"']*["']/i, 'placeholder note must remain');
+  });
+
+  it('styles define blueprint tokens, grid, frames, and responsive/reduced-motion rules', () => {
+    const css = read('assets/css/styles.css');
+    assert.match(css, /--grid-line\s*:/i, 'missing --grid-line token');
+    assert.match(css, /--violet\s*:/i, 'missing --violet token');
+    assert.match(css, /\.blueprint\s*\{[^}]*linear-gradient/i, '.blueprint needs linear-gradient grid');
+    assert.match(css, /\.frame::before|\.frame:before/i, 'missing .frame::before corner bracket');
+    assert.match(css, /\.frame::after|\.frame:after/i, 'missing .frame::after corner bracket');
+    assert.match(
+      css,
+      /prefers-reduced-motion[\s\S]{0,800}\.orbit-dash[\s\S]{0,200}animation[^;]*none|prefers-reduced-motion[\s\S]{0,800}\.pulse[\s\S]{0,200}animation[^;]*none/i,
+      'reduced-motion should disable .orbit-dash or .pulse animations'
+    );
+    assert.match(
+      css,
+      /@media\s*\([^)]*max-width:\s*720px[^)]*\)[\s\S]{0,600}\.art-label/i,
+      'need <=720px media query that targets .art-label'
+    );
+  });
+});
+
+describe('scroll interactions and mobile polish', () => {
+  it('scroll.js exports progressFor and stepFor with clamped ranges', () => {
+    const scrollPath = path.join(ROOT, 'assets/js/scroll.js');
+    assert.ok(fs.existsSync(scrollPath), 'assets/js/scroll.js must exist');
+    const { progressFor, stepFor } = require(scrollPath);
+    assert.equal(typeof progressFor, 'function', 'progressFor export');
+    assert.equal(typeof stepFor, 'function', 'stepFor export');
+
+    // rect below viewport (top > viewportH) -> 0
+    assert.equal(progressFor({ top: 900, height: 200 }, 800), 0);
+    // rect above viewport (bottom < 0) -> 1
+    assert.equal(progressFor({ top: -400, height: 200 }, 800), 1);
+    // centered: mid of element at mid of viewport
+    const centered = progressFor({ top: 300, height: 200 }, 800);
+    assert.ok(centered > 0.4 && centered < 0.6, `expected ~0.5 when centered, got ${centered}`);
+    assert.equal(progressFor({ top: -1000, height: 50 }, 800), 1);
+    assert.equal(progressFor({ top: 2000, height: 50 }, 800), 0);
+
+    assert.equal(stepFor(0, 5), 0);
+    assert.equal(stepFor(0.99, 5), 4);
+    assert.equal(stepFor(1, 5), 4);
+    assert.equal(stepFor(0.5, 0), 0);
+    assert.ok(!Number.isNaN(stepFor(0.5, 0)), 'stepFor must not return NaN when count is 0');
+  });
+
+  it('home has a scroll story with 5 steps matching hub nodes', () => {
+    const html = read('index.html');
+    assert.match(html, /data-story[\s>]/i, 'missing [data-story]');
+    const steps = html.match(/data-story-step=["']([^"']+)["']/gi) || [];
+    assert.equal(steps.length, 5, `expected exactly 5 [data-story-step], found ${steps.length}`);
+    for (const id of ['billing', 'stock', 'payments', 'crm', 'website']) {
+      assert.match(html, new RegExp(`data-story-step=["']${id}["']`, 'i'), `missing data-story-step=${id}`);
+      assert.match(html, new RegExp(`data-node=["']${id}["']`, 'i'), `hub must keep data-node=${id}`);
+    }
+  });
+
+  it('hero has data-scroll hooks and scroll.js loads before main.js', () => {
+    const html = read('index.html');
+    const hero = html.match(/<section[^>]+data-hero[\s\S]*?<\/section>/i);
+    assert.ok(hero, 'missing [data-hero]');
+    assert.match(hero[0], /data-scroll/i, 'hero needs [data-scroll] elements');
+    const scrollIdx = html.indexOf('assets/js/scroll.js');
+    const mainIdx = html.indexOf('assets/js/main.js');
+    assert.ok(scrollIdx !== -1, 'scroll.js must be loaded');
+    assert.ok(mainIdx !== -1, 'main.js must be loaded');
+    assert.ok(scrollIdx < mainIdx, 'scroll.js must load before main.js');
+    for (const page of ['services.html', 'contact.html', 'about.html']) {
+      const pageHtml = read(page);
+      const s = pageHtml.indexOf('assets/js/scroll.js');
+      const m = pageHtml.indexOf('assets/js/main.js');
+      assert.ok(s !== -1 && s < m, `${page}: scroll.js before main.js`);
+    }
+  });
+
+  it('home has an accessible mobile CTA and contact page does not', () => {
+    const home = read('index.html');
+    assert.match(home, /class=["'][^"']*mobile-cta[^"']*["']/i, 'home needs .mobile-cta');
+    assert.match(
+      home,
+      /class=["'][^"']*mobile-cta[^"']*["'][^>]*(?:aria-label|aria-labelledby)=["'][^"']+["']|(?:aria-label|aria-labelledby)=["'][^"']+["'][^>]*class=["'][^"']*mobile-cta/i,
+      '.mobile-cta needs an accessible name'
+    );
+    assert.doesNotMatch(read('contact.html'), /class=["'][^"']*mobile-cta[^"']*["']/i, 'contact.html must not show mobile CTA');
+  });
+
+  it('flow card row is keyboard-scrollable with aria-label', () => {
+    const html = read('index.html');
+    assert.match(
+      html,
+      /(?:class=["'][^"']*flow-list[^"']*["'][^>]*tabindex=["']0["']|tabindex=["']0["'][^>]*class=["'][^"']*flow-list)/i,
+      '.flow-list needs tabindex=0'
+    );
+    assert.match(
+      html,
+      /(?:class=["'][^"']*flow-list[^"']*["'][^>]*aria-label=["'][^"']+["']|aria-label=["'][^"']+["'][^>]*class=["'][^"']*flow-list)/i,
+      '.flow-list needs aria-label'
+    );
+  });
+
+  it('styles cover sticky story, snap rows, safe-area, header hide and reduced-motion scroll resets', () => {
+    const css = read('assets/css/styles.css');
+    assert.match(
+      css,
+      /@media\s*\([^)]*min-width:\s*960px[^)]*\)[\s\S]{0,1200}position:\s*sticky/i,
+      'sticky story needs position:sticky inside >=960px media query'
+    );
+    assert.match(css, /scroll-snap-type/i, 'missing scroll-snap-type for mobile rows');
+    assert.match(css, /env\(\s*safe-area-inset-bottom/i, 'mobile CTA needs safe-area-inset-bottom');
+    assert.match(css, /\.site-header\.is-hidden|\.site-header\.is-hidden/i, 'missing .site-header.is-hidden');
+    assert.match(
+      css,
+      /prefers-reduced-motion[\s\S]{0,1200}\[data-scroll\]|prefers-reduced-motion[\s\S]{0,1200}data-scroll/i,
+      'reduced-motion should reset [data-scroll] transforms'
+    );
+    assert.match(
+      css,
+      /prefers-reduced-motion[\s\S]{0,1500}sticky|prefers-reduced-motion[\s\S]{0,1500}story/i,
+      'reduced-motion should un-pin the story section'
+    );
+  });
+
+  it('scroll.js and main.js use passive scroll listeners and honour reduced motion', () => {
+    const scrollJs = read('assets/js/scroll.js');
+    const mainJs = read('assets/js/main.js');
+    assert.match(scrollJs, /prefers-reduced-motion/i, 'scroll.js must check prefers-reduced-motion');
+    assert.match(scrollJs, /passive:\s*true/i, 'scroll.js scroll listeners must be passive');
+    assert.match(mainJs, /passive:\s*true/i, 'main.js scroll listeners must be passive');
+  });
+});
+
+describe('production polish', () => {
+  const cssRule = (css, selector) => {
+    const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const m = css.match(new RegExp(`(?:^|\\n)\\s*${esc}\\s*\\{([^}]*)\\}`));
+    return m ? m[1] : null;
+  };
+
+  it('pinned story grid keeps container gutters (no width:100% override)', () => {
+    const css = read('assets/css/styles.css');
+    const rule = cssRule(css, '.story-pin .connected-grid');
+    if (rule !== null) {
+      assert.doesNotMatch(rule, /width:\s*100%/i, '.story-pin .connected-grid must not override .container width');
+    }
+    assert.match(
+      read('index.html'),
+      /class=["'][^"']*story-pin[^"']*["'][^>]*>\s*<div class=["'][^"']*\bcontainer\b[^"']*connected-grid/i,
+      'story-pin must wrap a .container.connected-grid'
+    );
+  });
+
+  it('only one story step is highlighted at a time', () => {
+    const mainJs = read('assets/js/main.js');
+    const css = read('assets/css/styles.css');
+    const pulse = mainJs.match(/function pulseHub\([^)]*\)\s*\{[\s\S]*?\n  \}/);
+    assert.ok(pulse, 'pulseHub not found');
+    assert.doesNotMatch(pulse[0], /data-flow/, 'pulseHub must not touch flow items (they are driven by setStoryActive)');
+    assert.doesNotMatch(mainJs, /addEventListener\(\s*['"]demo:step['"]/, 'hero demo must not drive the story diagram');
+    assert.doesNotMatch(css, /\.flow-item\.is-hot/, 'flow items should only style is-active, not is-hot');
+  });
+
+  it('service tab list stays sticky (not overridden to position:relative with a top offset)', () => {
+    const css = read('assets/css/styles.css');
+    const topLevel = css.replace(/@media[^{]*\{(?:[^{}]*\{[^}]*\})*\s*\}/g, '');
+    const rule = cssRule(topLevel, '.tab-list');
+    assert.ok(rule, 'missing .tab-list base rule');
+    assert.doesNotMatch(topLevel, /(?:^|\n)\.tab-list\s*\{[^}]*position:\s*relative/i, '.tab-list position:relative overrides the sticky rail');
+  });
+
+  it('industry rows use short, readable tag labels', () => {
+    const html = read('index.html');
+    const tags = [...html.matchAll(/<span class="tag">([^<]+)<\/span>/g)].map((m) => m[1]);
+    assert.ok(tags.length >= 16, `expected tags on index, found ${tags.length}`);
+    const long = tags.filter((t) => t.length > 12);
+    assert.deepEqual(long, [], `tags longer than 12 chars:\n${long.join('\n')}`);
+  });
+
+  it('every kicker renders the same bar accent', () => {
+    const css = read('assets/css/styles.css');
+    const base = cssRule(css, '.kicker::before');
+    assert.ok(base, 'missing base .kicker::before');
+    const w = base.match(/width:\s*(\d+)px/);
+    const h = base.match(/height:\s*(\d+)px/);
+    assert.ok(w && +w[1] >= 16, 'base kicker accent should be a bar (width >= 16px)');
+    assert.ok(h && +h[1] <= 3, 'base kicker accent should be a thin bar (height <= 3px)');
+    assert.doesNotMatch(css, /\.kicker::before\s*\{[^}]*width:\s*6px/, 'no kicker should fall back to a 6px square');
+  });
+
+  it('stylesheet has no empty rules or dead selectors', () => {
+    const css = read('assets/css/styles.css');
+    const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const empty = noComments.match(/[^{}]+\{\s*\}/g) || [];
+    assert.deepEqual(empty.map((s) => s.trim()), [], 'empty CSS rules found');
+    assert.doesNotMatch(css, /:has\(\s*\+\s*\*\s*\)/, 'stray :has(+ *) selector');
+    for (const dead of ['.announce', '.ind-row', '.ind-desc', '.ind-name', '.ind-num', '.ind-preview', '.stat-value', '.stat-label']) {
+      assert.ok(!css.includes(dead), `dead selector ${dead} still in stylesheet`);
+    }
+    const stats = noComments.match(/(?:^|\n)\.stats\s*\{/g) || [];
+    assert.equal(stats.length, 1, `.stats defined ${stats.length} times at top level`);
   });
 });
 

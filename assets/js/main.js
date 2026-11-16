@@ -42,12 +42,22 @@
     onScrollProgress();
   }
 
-  /* Header: scrolled state + mobile nav */
+  /* Header: scrolled state + mobile hide-on-scroll */
   var header = document.querySelector('.site-header');
   var toggle = document.querySelector('.nav-toggle');
+  var lastScrollY = window.scrollY;
+  var mobileMq = window.matchMedia('(max-width: 720px)');
   if (header) {
     var setScrolled = function () {
-      header.classList.toggle('is-scrolled', window.scrollY > 8);
+      var y = window.scrollY;
+      header.classList.toggle('is-scrolled', y > 8);
+      if (!reduceMotion && mobileMq.matches && !header.classList.contains('nav-open')) {
+        var goingDown = y > lastScrollY && y > 80;
+        header.classList.toggle('is-hidden', goingDown);
+      } else {
+        header.classList.remove('is-hidden');
+      }
+      lastScrollY = y;
     };
     setScrolled();
     window.addEventListener('scroll', setScrolled, { passive: true });
@@ -156,7 +166,7 @@
   var hub = document.querySelector('[data-hub]');
   var hubTip = document.querySelector('[data-hub-tip]');
   var tips = {
-    billing: 'GST invoice on every sale',
+    billing: 'Invoice on every sale',
     stock: 'Inventory adjusts live',
     payments: 'UPI settles and reconciles',
     crm: 'Loyalty and follow-ups fire',
@@ -165,8 +175,12 @@
 
   function pulseHub(id) {
     if (!hub || !id) return;
+    hub.querySelectorAll('.is-hot').forEach(function (el) {
+      el.classList.remove('is-hot');
+    });
     var link = hub.querySelector('[data-link="' + id + '"]');
     var node = hub.querySelector('[data-node="' + id + '"]');
+    var orbitNode = hub.querySelector('[data-orbit-node="' + id + '"]');
     if (link) {
       link.classList.add('is-hot');
       setTimeout(function () {
@@ -179,22 +193,138 @@
         node.classList.remove('is-hot');
       }, 1400);
     }
+    if (orbitNode) {
+      orbitNode.classList.add('is-hot');
+      setTimeout(function () {
+        orbitNode.classList.remove('is-hot');
+      }, 1400);
+    }
     if (hubTip && tips[id]) hubTip.textContent = tips[id];
+  }
+
+  var story = document.querySelector('[data-story]');
+  var storySteps = story
+    ? Array.prototype.slice.call(story.querySelectorAll('[data-story-step]'))
+    : [];
+  var flowDots = document.querySelector('[data-flow-dots]');
+  var activeStoryId = '';
+
+  function setStoryActive(id, pulse) {
+    if (!id) return;
+    storySteps.forEach(function (el) {
+      el.classList.toggle('is-active', el.getAttribute('data-story-step') === id);
+    });
+    if (flowDots) {
+      var idx = storySteps.findIndex(function (el) {
+        return el.getAttribute('data-story-step') === id;
+      });
+      Array.prototype.forEach.call(flowDots.children, function (dot, i) {
+        dot.classList.toggle('is-active', i === idx);
+      });
+    }
+    if (hub) {
+      hub.querySelectorAll('[data-link], [data-node], [data-orbit-node]').forEach(function (el) {
+        var match =
+          el.getAttribute('data-link') === id ||
+          el.getAttribute('data-node') === id ||
+          el.getAttribute('data-orbit-node') === id;
+        el.classList.toggle('is-active', match);
+      });
+    }
+    if (hubTip && tips[id]) hubTip.textContent = tips[id];
+    if (pulse && id !== activeStoryId) pulseHub(id);
+    activeStoryId = id;
   }
 
   if (hub) {
     hub.querySelectorAll('[data-node]').forEach(function (node) {
       var id = node.getAttribute('data-node');
       var activate = function () {
-        pulseHub(id);
+        setStoryActive(id, true);
       };
       node.addEventListener('mouseenter', activate);
       node.addEventListener('focus', activate);
     });
+    document.querySelectorAll('[data-flow]').forEach(function (item) {
+      item.addEventListener('mouseenter', function () {
+        setStoryActive(item.getAttribute('data-flow'), true);
+      });
+    });
   }
 
-  document.addEventListener('demo:step', function (e) {
-    if (e.detail && e.detail.node) pulseHub(e.detail.node);
+  /* Desktop scroll story + mobile snap carousel */
+  if (story && storySteps.length && !reduceMotion) {
+    var desktopStoryMq = window.matchMedia('(min-width: 960px)');
+    var onStoryScroll = function (e) {
+      if (!desktopStoryMq.matches) return;
+      var detail = e && e.detail;
+      var p = detail && typeof detail.progress === 'number' ? detail.progress : 0;
+      var step = window.NLScroll
+        ? window.NLScroll.stepFor(p, storySteps.length)
+        : Math.min(storySteps.length - 1, Math.floor(p * storySteps.length));
+      var id = storySteps[step] && storySteps[step].getAttribute('data-story-step');
+      if (id && id !== activeStoryId) setStoryActive(id, true);
+    };
+    story.addEventListener('nl:scroll', onStoryScroll);
+
+    var flowList = story.querySelector('.flow-list');
+    if (flowList && 'IntersectionObserver' in window) {
+      var cardIo = new IntersectionObserver(
+        function (entries) {
+          if (desktopStoryMq.matches) return;
+          var best = null;
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            if (!best || entry.intersectionRatio > best.intersectionRatio) best = entry;
+          });
+          if (best && best.target.getAttribute('data-story-step')) {
+            setStoryActive(best.target.getAttribute('data-story-step'), true);
+          }
+        },
+        { root: flowList, threshold: 0.6 }
+      );
+      storySteps.forEach(function (el) {
+        cardIo.observe(el);
+      });
+    }
+
+    if (storySteps[0]) setStoryActive(storySteps[0].getAttribute('data-story-step'), false);
+  } else if (storySteps[0]) {
+    setStoryActive(storySteps[0].getAttribute('data-story-step'), false);
+  }
+
+  /* Mobile sticky CTA */
+  var mobileCta = document.querySelector('[data-mobile-cta]');
+  var heroEl = document.querySelector('[data-hero]');
+  var footerEl = document.querySelector('.site-footer');
+  if (mobileCta && heroEl && mobileMq.matches !== undefined) {
+    var syncCta = function () {
+      if (!mobileMq.matches) {
+        mobileCta.hidden = true;
+        mobileCta.classList.remove('is-visible');
+        return;
+      }
+      var pastHero = window.scrollY > (heroEl.offsetHeight || 400) * 0.55;
+      var nearFooter = false;
+      if (footerEl) {
+        var fr = footerEl.getBoundingClientRect();
+        nearFooter = fr.top < window.innerHeight - 40;
+      }
+      var show = pastHero && !nearFooter;
+      mobileCta.hidden = !show;
+      mobileCta.classList.toggle('is-visible', show);
+    };
+    syncCta();
+    window.addEventListener('scroll', syncCta, { passive: true });
+    window.addEventListener('resize', syncCta, { passive: true });
+  }
+
+  /* Mobile tabs: keep selected chip in view */
+  document.querySelectorAll('[data-tabs] .tab-list').forEach(function (list) {
+    var selected = list.querySelector('[aria-selected="true"]');
+    if (selected && selected.scrollIntoView && window.matchMedia('(max-width: 959px)').matches) {
+      selected.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
   });
 
   /* Live sale demo */
@@ -209,7 +339,7 @@
     var steps = Array.prototype.slice.call(demo.querySelectorAll('[data-step]'));
     var state = { stock: 24, sales: 18420, invoices: 41, invNo: 2041, points: 120, running: false };
     var PRICE = 649;
-    var GST_RATE = 0.05;
+    var TAX_RATE = 0.05;
 
     var rupees = function (n) {
       return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
@@ -233,8 +363,8 @@
         s.querySelector('[data-v]').textContent = '';
       });
 
-      var taxable = PRICE / (1 + GST_RATE);
-      var halfTax = ((PRICE - taxable) / 2).toFixed(2);
+      var taxable = PRICE / (1 + TAX_RATE);
+      var taxAmt = (PRICE - taxable).toFixed(2);
       var invNo = ++state.invNo;
       var before = state.stock;
       state.points += 6;
@@ -242,7 +372,7 @@
       var values = [
         'Counter 01 · ' + rupees(PRICE),
         'Basmati 5 kg · ' + before + ' → ' + (before - 1) + ' left',
-        'INV-' + invNo + ' · CGST ₹' + halfTax + ' + SGST ₹' + halfTax,
+        'INV-' + invNo + ' · Tax ₹' + taxAmt,
         'UPI via Razorpay · captured',
         'WhatsApp receipt · ' + state.points + ' pts',
       ];
@@ -270,14 +400,12 @@
           steps[i - 1].classList.remove('is-active');
           steps[i - 1].classList.add('is-done');
           if (effects[i - 1]) effects[i - 1]();
-          var target = steps[i - 1].getAttribute('data-hub-target');
-          document.dispatchEvent(new CustomEvent('demo:step', { detail: { node: target } }));
         }
         if (i === steps.length) {
           state.running = false;
           runBtn.disabled = false;
           runLabel.textContent = 'Ring up another sale';
-          status.textContent = 'Sale complete. Stock, GST, payment and CRM updated.';
+          status.textContent = 'Sale complete. Stock, invoice, payment and CRM updated.';
           return;
         }
         steps[i].classList.add('is-active');
@@ -368,7 +496,7 @@
       },
       { threshold: 0.2 }
     );
-    document.querySelectorAll('.viz, .hub-svg').forEach(function (el) {
+    document.querySelectorAll('.viz, .hub-svg, .orbit-svg').forEach(function (el) {
       vio.observe(el);
     });
   }
@@ -420,20 +548,20 @@
     }
   }
 
-  /* Stat counters + sparkline */
+  /* Stat / door counters + sparkline */
   document.querySelectorAll('[data-count]').forEach(function (el) {
     var target = Number(el.getAttribute('data-count')) || 0;
     var suffix = el.getAttribute('data-suffix') || '';
-    var stat = el.closest('.stat');
+    var card = el.closest('.door, .stat');
     if (reduceMotion) {
       el.textContent = target + suffix;
-      if (stat) stat.classList.add('is-in');
+      if (card) card.classList.add('is-in');
       return;
     }
     onVisible(
       el,
       function () {
-        if (stat) stat.classList.add('is-in');
+        if (card) card.classList.add('is-in');
         var t0 = performance.now();
         var tick = function (now) {
           var p = Math.min(1, (now - t0) / 1400);
@@ -465,7 +593,7 @@
         p.hidden = !p.querySelector('[data-search]:not([hidden])');
       });
       if (count) count.textContent = shown + ' of ' + rows.length + ' services';
-      if (empty) empty.textContent = shown ? '' : 'No services match “' + filter.value.trim() + '”. Try “GST”, “UPI” or “stock”.';
+      if (empty) empty.textContent = shown ? '' : 'No services match “' + filter.value.trim() + '”. Try “billing”, “UPI” or “stock”.';
     };
     filter.addEventListener('input', apply);
     apply();
