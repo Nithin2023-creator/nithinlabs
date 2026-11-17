@@ -8,11 +8,27 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://nithinlabs.com';
+const BRAND = 'NithinLabs';
 const EMAIL = 'hello@nithinlabs.com';
 const PHONE = '+91 90000 00000';
 const PHONE_TEL = '+919000000000';
 const CITY = 'Hyderabad, Telangana';
 const ASSET_VERSION = Date.now().toString(36);
+const REFERRAL = {
+  amount: 500,
+  display: '₹500',
+  payout: 'UPI or bank transfer',
+  payoutShort: 'UPI',
+  phone: '8125611565',
+  phoneTel: '918125611565',
+};
+
+function referralWhatsAppUrl() {
+  const text = encodeURIComponent(
+    `Hi Nithinlabs — I'd like to refer a client and claim ${REFERRAL.display}.`
+  );
+  return `https://wa.me/${REFERRAL.phoneTel}?text=${text}`;
+}
 
 const ICON_PATHS = {
   users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -42,22 +58,18 @@ const ICON_PATHS = {
   pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
   call: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/>',
   sparkle: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
+  gift: '<rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18"/><path d="M12 8H7.5a2.5 2.5 0 1 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 1 0 0-5C13 3 12 8 12 8z"/>',
 };
 
 function icon(name, cls = 'icon') {
   return `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
 }
 
-/** Erlenmeyer flask mark — white strokes on dark square */
-function flaskMark(sizeClass = '') {
+/** Circuit-flask brand mark (PNG, transparent) */
+function flaskMark(sizeClass = '', depth = 0) {
+  const src = `${rel(depth, 'assets/img/logo-mark.png')}?v=${ASSET_VERSION}`;
   return `<span class="logo-mark${sizeClass ? ' ' + sizeClass : ''}" data-logo="flask" aria-hidden="true">
-    <svg class="flask-svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path class="flask-body" d="M9 3h6M10 3v5.5L5.2 17.2A3.5 3.5 0 0 0 8.3 22h7.4a3.5 3.5 0 0 0 3.1-4.8L14 8.5V3" stroke="#fff" stroke-width="1.7"/>
-      <path class="flask-liquid" d="M7.2 16.5h9.6" stroke="#fff" stroke-width="1.5" opacity=".9"/>
-      <circle class="flask-bubble b1" cx="10.2" cy="14.2" r=".7" fill="#fff"/>
-      <circle class="flask-bubble b2" cx="13.4" cy="13.1" r=".55" fill="#fff" opacity=".85"/>
-      <circle class="flask-bubble b3" cx="11.8" cy="15.4" r=".45" fill="#fff" opacity=".7"/>
-    </svg>
+    <img class="logo-img" src="${src}" width="44" height="44" alt="" decoding="async">
   </span>`;
 }
 
@@ -244,12 +256,15 @@ function head({ title, description, depth = 0, pagePath }) {
   <meta name="theme-color" content="#fafaf8">
   <link rel="canonical" href="${canonical}">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Nithinlabs">
+  <meta property="og:site_name" content="${BRAND}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:url" content="${canonical}">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="${rel(depth, 'favicon.svg')}" type="image/svg+xml">
+  <link rel="icon" href="${rel(depth, 'favicon.ico')}?v=${ASSET_VERSION}" sizes="any">
+  <link rel="icon" href="${rel(depth, 'favicon.png')}?v=${ASSET_VERSION}" type="image/png" sizes="32x32">
+  <link rel="icon" href="${rel(depth, 'favicon.svg')}?v=${ASSET_VERSION}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="${rel(depth, 'assets/img/apple-touch-icon.png')}?v=${ASSET_VERSION}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -267,9 +282,9 @@ function header(depth, current) {
   return `
   <header class="site-header">
     <div class="container header-inner">
-      <a class="logo" href="${l('index.html')}" aria-label="Nithinlabs home">
-        ${flaskMark()}
-        Nithinlabs
+      <a class="logo" href="${l('index.html')}" aria-label="${BRAND} home">
+        ${flaskMark('', depth)}
+        <span class="logo-word">${BRAND}</span>
       </a>
       <nav class="nav" aria-label="Primary">
         <a href="${l('services.html')}"${cur('services')}>Services</a>
@@ -286,16 +301,23 @@ function header(depth, current) {
   </header>`;
 }
 
-function footer(depth) {
+function footer(depth, { extraScripts = [] } = {}) {
   const l = (f) => rel(depth, f);
+  const scripts = [
+    `<script src="${rel(depth, 'assets/js/scroll.js')}?v=${ASSET_VERSION}" defer></script>`,
+    ...extraScripts.map(
+      (src) => `<script src="${rel(depth, src)}?v=${ASSET_VERSION}" defer></script>`
+    ),
+    `<script src="${rel(depth, 'assets/js/main.js')}?v=${ASSET_VERSION}" defer></script>`,
+  ].join('\n  ');
   return `
   <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
           <a class="logo" href="${l('index.html')}">
-            ${flaskMark()}
-            Nithinlabs
+            ${flaskMark('', depth)}
+            <span class="logo-word">${BRAND}</span>
           </a>
           <p>Billing, stock, payments and websites — wired together for Indian SMBs.</p>
         </div>
@@ -314,6 +336,7 @@ function footer(depth) {
           <a href="${l('industries.html')}">Industries</a>
           <a href="${l('case-studies.html')}">Work</a>
           <a href="${l('contact.html')}">Contact</a>
+          <a href="${referralWhatsAppUrl()}" target="_blank" rel="noopener noreferrer">Refer &amp; earn ${REFERRAL.display}</a>
         </div>
         <div class="footer-col">
           <h4>Get in touch</h4>
@@ -324,7 +347,7 @@ function footer(depth) {
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© ${new Date().getFullYear()} Nithinlabs. Made in India.</span>
+        <span>© ${new Date().getFullYear()} ${BRAND}. Made in India.</span>
         <nav aria-label="Legal">
           <a href="${l('privacy.html')}">Privacy</a>
           <a href="${l('terms.html')}">Terms</a>
@@ -333,11 +356,31 @@ function footer(depth) {
     </div>
     <p class="wordmark" aria-hidden="true">nithinlabs</p>
   </footer>
-  <script src="${rel(depth, 'assets/js/scroll.js')}?v=${ASSET_VERSION}" defer></script>
-  <script src="${rel(depth, 'assets/js/main.js')}?v=${ASSET_VERSION}" defer></script>
+  ${scripts}
 </body>
 </html>
 `;
+}
+
+function referralBand() {
+  return `
+    <section class="band-ink referral-band" data-section data-referral-band>
+      <div class="container referral-band-inner" data-reveal>
+        <div class="referral-band-copy">
+          <span class="kicker">Refer &amp; earn</span>
+          <h2>Know a business that needs this?</h2>
+          <p>Introduce them to Nithinlabs. When they become a paying client, you earn ${REFERRAL.display} — paid via ${REFERRAL.payoutShort}. Message us on WhatsApp to claim it.</p>
+        </div>
+        <div class="referral-band-aside">
+          <div class="reward-card reward-card-ink frame" aria-hidden="true">
+            <span class="door-label">REWARD</span>
+            <div class="door-value" data-count="${REFERRAL.amount}" data-prefix="₹">${REFERRAL.display}</div>
+            <span class="door-caption">Per paying client</span>
+          </div>
+          <a class="btn btn-light" data-magnetic href="${referralWhatsAppUrl()}" target="_blank" rel="noopener noreferrer">Refer on WhatsApp ${icon('message')}</a>
+        </div>
+      </div>
+    </section>`;
 }
 
 function mobileCta(depth) {
@@ -405,7 +448,7 @@ const orgJsonLd = `
   <script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org',
     '@type': ['Organization', 'LocalBusiness'],
-    name: 'Nithinlabs',
+    name: BRAND,
     url: SITE,
     email: EMAIL,
     telephone: PHONE,
@@ -440,8 +483,8 @@ const HEADLINE = 'Your business, wired together.';
 write(
   'index.html',
   head({
-    title: 'Nithinlabs | Billing, inventory, payments and websites for Indian SMBs',
-    description: 'Nithinlabs builds billing, inventory, payment gateway, website and retention systems for Indian SMBs — one connected stack.',
+    title: BRAND + ' | Billing, inventory, payments and websites for Indian SMBs',
+    description: `${BRAND} builds billing, inventory, payment gateway, website and retention systems for Indian SMBs — one connected stack.`,
     pagePath: 'index.html',
   }) +
     header(0, 'home') +
@@ -636,7 +679,9 @@ write(
         <p class="placeholder-note">* Placeholder metrics.</p>
       </div>
     </section>
-
+` +
+    referralBand() +
+    `
     <section class="section" data-section>
       <div class="container faq-wrap">
         <div class="faq-aside" data-reveal>
@@ -670,7 +715,7 @@ write(
 write(
   'services.html',
   head({
-    title: 'Services | Nithinlabs',
+    title: 'Services | ' + BRAND,
     description: 'Nithinlabs services: retention, websites, billing, inventory, payment gateways, ERP, apps and more.',
     pagePath: 'services.html',
   }) +
@@ -725,7 +770,7 @@ for (const s of SERVICES) {
   const related = SERVICES.filter((x) => x.pillar === s.pillar && x.slug !== s.slug).slice(0, 4);
   write(
     `services/${s.slug}.html`,
-    head({ title: `${s.name} | Nithinlabs`, description: s.short, depth: 1, pagePath: `services/${s.slug}.html` }) +
+    head({ title: `${s.name} | ${BRAND}`, description: s.short, depth: 1, pagePath: `services/${s.slug}.html` }) +
       header(1, 'services') +
       `
   <main id="main">
@@ -795,7 +840,7 @@ for (const s of SERVICES) {
 write(
   'industries.html',
   head({
-    title: 'Industries | Nithinlabs',
+    title: 'Industries | ' + BRAND,
     description: 'Billing, stock and payments for retail, restaurants, pharma, clinics, salons, distributors, manufacturing and education.',
     pagePath: 'industries.html',
   }) +
@@ -843,7 +888,7 @@ const CASES = [
 write(
   'case-studies.html',
   head({
-    title: 'Work | Nithinlabs',
+    title: 'Work | ' + BRAND,
     description: 'Sample Nithinlabs project stories. Replace with verified case studies before launch.',
     pagePath: 'case-studies.html',
   }) +
@@ -889,8 +934,8 @@ write(
 write(
   'about.html',
   head({
-    title: 'About | Nithinlabs',
-    description: 'Nithinlabs builds and runs billing, inventory, payment, website and retention systems for Indian SMBs.',
+    title: 'About | ' + BRAND,
+    description: `${BRAND} builds and runs billing, inventory, payment, website and retention systems for Indian SMBs.`,
     pagePath: 'about.html',
   }) +
     header(0, 'about') +
@@ -899,7 +944,7 @@ write(
     pageHero({
       depth: 0,
       crumbs: [{ label: 'About' }],
-      kicker: 'About Nithinlabs',
+      kicker: `About ${BRAND}`,
       title: 'Serious software. No enterprise drama.',
     }) +
     `
@@ -950,7 +995,7 @@ const MODULES = [
 write(
   'contact.html',
   head({
-    title: 'Contact | Nithinlabs',
+    title: 'Contact | ' + BRAND,
     description: 'Book a free 30-minute call with Nithinlabs about billing, inventory, payments or websites.',
     pagePath: 'contact.html',
   }) +
@@ -1003,6 +1048,14 @@ write(
             <a href="https://wa.me/${PHONE_TEL.slice(1)}">${icon('message')}WhatsApp us</a>
             <div>${icon('pin')}${CITY}, India</div>
           </div>
+          <a class="contact-refer" href="${referralWhatsAppUrl()}" target="_blank" rel="noopener noreferrer">
+            <span class="contact-refer-icon">${icon('gift')}</span>
+            <span>
+              <strong>Not for you, but know someone?</strong>
+              <span>Earn ${REFERRAL.display} — refer them on WhatsApp.</span>
+            </span>
+            ${icon('arrow')}
+          </a>
         </aside>
       </div>
     </section>
@@ -1032,7 +1085,7 @@ ${body}
 
 legal(
   'privacy.html',
-  'Privacy Policy | Nithinlabs',
+  'Privacy Policy | ' + BRAND,
   'How Nithinlabs handles website and enquiry data.',
   'Privacy Policy',
   'How we handle information from this site.',
@@ -1052,7 +1105,7 @@ legal(
 
 legal(
   'terms.html',
-  'Terms of Service | Nithinlabs',
+  'Terms of Service | ' + BRAND,
   'Terms for using the Nithinlabs website.',
   'Terms of Service',
   'Terms for using this website.',
@@ -1060,6 +1113,8 @@ legal(
         <p>Information only. Nothing is a binding offer until a written proposal is accepted.</p>
         <h2>Client projects</h2>
         <p>Scope, timelines, fees and SLAs live in the signed proposal.</p>
+        <h2>Referral programme</h2>
+        <p>Anyone may refer a business to Nithinlabs on WhatsApp at <a href="${referralWhatsAppUrl()}">+91 ${REFERRAL.phone}</a>. A reward of ${REFERRAL.display} is paid once the referred business becomes a paying client, via ${REFERRAL.payout}. The first valid referral of a given business wins. Self-referrals and businesses with an existing open conversation with us do not qualify. Nithinlabs confirms eligibility and payout.</p>
         <h2>Accuracy</h2>
         <p>We keep content current. Sample case studies and metrics are marked.</p>
         <h2>Liability</h2>
@@ -1070,7 +1125,7 @@ legal(
 
 write(
   '404.html',
-  head({ title: 'Page not found | Nithinlabs', description: 'Page not found on Nithinlabs.', pagePath: '404.html' }) +
+  head({ title: 'Page not found | ' + BRAND, description: 'Page not found on Nithinlabs.', pagePath: '404.html' }) +
     header(0, 'none') +
     `
   <main id="main" class="error-page">

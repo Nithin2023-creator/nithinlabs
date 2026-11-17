@@ -551,10 +551,14 @@
   /* Stat / door counters + sparkline */
   document.querySelectorAll('[data-count]').forEach(function (el) {
     var target = Number(el.getAttribute('data-count')) || 0;
+    var prefix = el.getAttribute('data-prefix') || '';
     var suffix = el.getAttribute('data-suffix') || '';
-    var card = el.closest('.door, .stat');
+    var card = el.closest('.door, .stat, .reward-card');
+    var format = function (n) {
+      return prefix + n + suffix;
+    };
     if (reduceMotion) {
-      el.textContent = target + suffix;
+      el.textContent = format(target);
       if (card) card.classList.add('is-in');
       return;
     }
@@ -565,7 +569,7 @@
         var t0 = performance.now();
         var tick = function (now) {
           var p = Math.min(1, (now - t0) / 1400);
-          el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+          el.textContent = format(Math.round(target * (1 - Math.pow(1 - p, 3))));
           if (p < 1) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);

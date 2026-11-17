@@ -117,6 +117,9 @@ describe('Nithinlabs site structure', () => {
   it('has design system assets', () => {
     assert.ok(exists('assets/css/styles.css'), 'missing styles.css');
     assert.ok(exists('assets/js/main.js'), 'missing main.js');
+    assert.ok(exists('assets/img/logo-mark.png'), 'missing circuit flask logo-mark');
+    assert.ok(exists('favicon.png'), 'missing favicon.png');
+    assert.ok(exists('favicon.ico'), 'missing favicon.ico');
     assert.ok(exists('favicon.svg'), 'missing favicon.svg');
     assert.ok(exists('robots.txt'), 'missing robots.txt');
     assert.ok(exists('sitemap.xml'), 'missing sitemap.xml');
@@ -312,7 +315,9 @@ describe('Interactive components', () => {
 });
 
 describe('Brand, motion and tighter home', () => {
-  it('header logo is a flask on every page and favicon uses the flask path', () => {
+  it('header logo is the circuit flask mark on every page and favicon uses the brand PNG', () => {
+    assert.ok(exists('assets/img/logo-mark.png'), 'missing assets/img/logo-mark.png');
+    assert.ok(exists('favicon.png'), 'missing favicon.png');
     for (const file of walkHtml(ROOT)) {
       const html = fs.readFileSync(file, 'utf8');
       assert.match(
@@ -320,10 +325,17 @@ describe('Brand, motion and tighter home', () => {
         /<a[^>]+class=["'][^"']*logo[^"']*["'][^>]*>[\s\S]*?data-logo=["']flask["']/i,
         `flask logo missing in ${path.relative(ROOT, file)}`
       );
+      assert.match(
+        html,
+        /data-logo=["']flask["'][\s\S]*?<img[^>]+src=["'][^"']*logo-mark\.png(?:\?[^"']*)?["']/i,
+        `circuit flask img missing in ${path.relative(ROOT, file)}`
+      );
+      assert.match(
+        html,
+        /rel=["']icon["'][^>]+href=["'][^"']*favicon\.(?:png|ico|svg)(?:\?[^"']*)?["']/i,
+        `favicon link missing in ${path.relative(ROOT, file)}`
+      );
     }
-    const favicon = read('favicon.svg');
-    assert.match(favicon, /flask|M\s*\d+[\s\d.,\-]*L|path/i, 'favicon should contain flask geometry');
-    assert.match(favicon, /<path[\s>]/i, 'favicon needs a path element');
   });
 
   it('home has an accessible system hub with at least 5 nodes', () => {
@@ -667,5 +679,52 @@ describe('SEO files', () => {
   it('robots.txt references sitemap', () => {
     const robots = read('robots.txt');
     assert.match(robots, /Sitemap:/i);
+  });
+});
+
+describe('Referral programme', () => {
+  const REFERRAL_WA = /https:\/\/wa\.me\/918125611565/;
+
+  it('has no dedicated refer page', () => {
+    assert.equal(exists('refer.html'), false, 'refer.html should not exist');
+  });
+
+  it('home band, footer and contact open WhatsApp for referrals', () => {
+    const home = read('index.html');
+    assert.match(home, /data-referral-band/i, 'home needs [data-referral-band]');
+    assert.match(
+      home,
+      /data-referral-band[\s\S]{0,1200}https:\/\/wa\.me\/918125611565/i,
+      'referral band must open WhatsApp 8125611565'
+    );
+    const main = home.match(/<main\b[^>]*>([\s\S]*)<\/main>/i);
+    assert.ok(main, 'missing main');
+    const sections = main[1].match(/<section\b/gi) || [];
+    assert.ok(sections.length <= 8, `home must stay <= 8 sections after referral band, found ${sections.length}`);
+
+    for (const page of [
+      'index.html',
+      'services.html',
+      'industries.html',
+      'case-studies.html',
+      'about.html',
+      'contact.html',
+      'privacy.html',
+      'terms.html',
+    ]) {
+      const html = read(page);
+      const footer = html.match(/<footer[\s\S]*?<\/footer>/i);
+      assert.ok(footer, `missing footer on ${page}`);
+      assert.match(footer[0], REFERRAL_WA, `footer referral must open WhatsApp on ${page}`);
+      assert.match(footer[0], /Refer|&amp; earn|₹500/i, `footer needs refer & earn label on ${page}`);
+    }
+
+    const contact = read('contact.html');
+    assert.match(contact, /class=["'][^"']*contact-refer[^"']*["'][^>]*href=["']https:\/\/wa\.me\/918125611565/i);
+    assert.match(read('terms.html'), /[Rr]eferral/i, 'terms.html must mention the referral programme');
+    assert.match(read('terms.html'), REFERRAL_WA, 'terms should point referrals to WhatsApp');
+
+    const nav = navLinks(read('index.html'), 'header');
+    assert.ok(nav && !nav.some((h) => h.includes('refer')), 'top nav must stay unchanged (no refer link)');
   });
 });
