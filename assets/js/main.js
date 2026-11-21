@@ -6,7 +6,7 @@
   'use strict';
 
   var FORM_ENDPOINT = '';
-  var CONTACT_EMAIL = 'hello@nithinlabs.com';
+  var CONTACT_EMAIL = 'hello@nithinlabs.tech';
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var finePointer = window.matchMedia('(pointer: fine)').matches;
 

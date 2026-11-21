@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nithinlabs.com/sitemap.xml
+Sitemap: https://nithinlabs.tech/sitemap.xml

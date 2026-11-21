@@ -670,7 +670,7 @@ describe('SEO files', () => {
       .filter((p) => p !== '404.html');
     const missing = [];
     for (const page of publicPages) {
-      const loc = page === 'index.html' ? '<loc>https://nithinlabs.com/</loc>' : `/${page}</loc>`;
+      const loc = page === 'index.html' ? '<loc>https://nithinlabs.tech/</loc>' : `/${page}</loc>`;
       if (!sitemap.includes(loc)) missing.push(page);
     }
     assert.deepEqual(missing, [], `sitemap missing:\n${missing.join('\n')}`);
@@ -678,7 +678,167 @@ describe('SEO files', () => {
 
   it('robots.txt references sitemap', () => {
     const robots = read('robots.txt');
-    assert.match(robots, /Sitemap:/i);
+    assert.match(robots, /Sitemap:\s*https:\/\/nithinlabs\.tech\/sitemap\.xml/i);
+  });
+});
+
+/**
+ * Read JPEG SOF0/SOF2 dimensions from a buffer.
+ * Returns { width, height } or null if not a valid JPEG with SOF.
+ */
+function jpegDimensions(buf) {
+  if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8) return null;
+  let i = 2;
+  while (i < buf.length - 9) {
+    if (buf[i] !== 0xff) {
+      i += 1;
+      continue;
+    }
+    const marker = buf[i + 1];
+    if (marker === 0xd8 || marker === 0xd9) {
+      i += 2;
+      continue;
+    }
+    const len = (buf[i + 2] << 8) | buf[i + 3];
+    // SOF0 (baseline) or SOF2 (progressive)
+    if (marker === 0xc0 || marker === 0xc2) {
+      const height = (buf[i + 5] << 8) | buf[i + 6];
+      const width = (buf[i + 7] << 8) | buf[i + 8];
+      return { width, height };
+    }
+    i += 2 + len;
+  }
+  return null;
+}
+
+function metaContent(html, propOrName) {
+  const re = new RegExp(
+    `<meta[^>]+(?:property|name)\\s*=\\s*["']${propOrName}["'][^>]+content\\s*=\\s*["']([^"']+)["']|<meta[^>]+content\\s*=\\s*["']([^"']+)["'][^>]+(?:property|name)\\s*=\\s*["']${propOrName}["']`,
+    'i'
+  );
+  const m = html.match(re);
+  return m ? m[1] || m[2] : null;
+}
+
+describe('Social link previews', () => {
+  const SITE = 'https://nithinlabs.tech';
+  const htmlFiles = walkHtml(ROOT);
+  const MAX_OG_BYTES = 300 * 1024;
+
+  it('every HTML page has complete Open Graph and Twitter image tags', () => {
+    for (const file of htmlFiles) {
+      const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+      const html = fs.readFileSync(file, 'utf8');
+
+      const ogImage = metaContent(html, 'og:image');
+      const twImage = metaContent(html, 'twitter:image');
+      const ogWidth = metaContent(html, 'og:image:width');
+      const ogHeight = metaContent(html, 'og:image:height');
+      const ogType = metaContent(html, 'og:image:type');
+      const ogAlt = metaContent(html, 'og:image:alt');
+      const ogLocale = metaContent(html, 'og:locale');
+
+      assert.ok(ogImage, `${rel}: missing og:image`);
+      assert.ok(ogImage.startsWith(`${SITE}/assets/og/`), `${rel}: og:image must be absolute under ${SITE}/assets/og/ — got ${ogImage}`);
+      assert.ok(ogImage.endsWith('.jpg'), `${rel}: og:image must be .jpg — got ${ogImage}`);
+
+      const localPath = ogImage.slice(`${SITE}/`.length);
+      assert.ok(exists(localPath), `${rel}: og:image file missing on disk: ${localPath}`);
+
+      assert.equal(twImage, ogImage, `${rel}: twitter:image must match og:image`);
+      assert.equal(ogWidth, '1200', `${rel}: og:image:width must be 1200`);
+      assert.equal(ogHeight, '630', `${rel}: og:image:height must be 630`);
+      assert.equal(ogType, 'image/jpeg', `${rel}: og:image:type must be image/jpeg`);
+      assert.ok(ogAlt && ogAlt.length > 0, `${rel}: missing og:image:alt`);
+      assert.equal(ogLocale, 'en_IN', `${rel}: og:locale must be en_IN`);
+    }
+  });
+
+  it('homepage uses home.jpg and title/description cover key services', () => {
+    const html = read('index.html');
+    const ogImage = metaContent(html, 'og:image');
+    const ogTitle = metaContent(html, 'og:title');
+    const ogDesc = metaContent(html, 'og:description');
+
+    assert.equal(ogImage, `${SITE}/assets/og/home.jpg`);
+    assert.match(ogTitle, /Billing/i);
+    assert.match(ogTitle, /Brand Websites/i);
+    assert.match(ogTitle, /Payments|Payment/i);
+    assert.match(ogTitle, /Inventory/i);
+    assert.match(ogDesc, /Billing/i);
+    assert.match(ogDesc, /Brand Websites|website/i);
+    assert.match(ogDesc, /Payments|payment/i);
+    assert.match(ogDesc, /Inventory|stock/i);
+  });
+
+  it('each service page uses assets/og/<slug>.jpg', () => {
+    for (const slug of REQUIRED_SERVICES) {
+      const html = read(`services/${slug}.html`);
+      const ogImage = metaContent(html, 'og:image');
+      assert.equal(
+        ogImage,
+        `${SITE}/assets/og/${slug}.jpg`,
+        `services/${slug}.html: expected og:image for ${slug}`
+      );
+    }
+  });
+
+  it('every OG JPEG is valid, 1200x630, and under 300 KB', () => {
+    const ogDir = path.join(ROOT, 'assets', 'og');
+    assert.ok(fs.existsSync(ogDir), 'assets/og directory missing');
+
+    const expected = ['home.jpg', ...REQUIRED_SERVICES.map((s) => `${s}.jpg`)];
+    for (const name of expected) {
+      const full = path.join(ogDir, name);
+      assert.ok(fs.existsSync(full), `missing ${name}`);
+      const buf = fs.readFileSync(full);
+      assert.ok(buf[0] === 0xff && buf[1] === 0xd8, `${name}: not a JPEG (bad magic bytes)`);
+      assert.ok(buf.length < MAX_OG_BYTES, `${name}: ${(buf.length / 1024).toFixed(1)} KB exceeds 300 KB`);
+      const dims = jpegDimensions(buf);
+      assert.ok(dims, `${name}: could not read JPEG dimensions`);
+      assert.equal(dims.width, 1200, `${name}: width ${dims.width} !== 1200`);
+      assert.equal(dims.height, 630, `${name}: height ${dims.height} !== 630`);
+    }
+  });
+
+  it('canonical, og:url, sitemap, robots and JSON-LD use nithinlabs.tech; no leftover .com URLs or emails', () => {
+    for (const file of htmlFiles) {
+      const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+      const html = fs.readFileSync(file, 'utf8');
+      const canonical = extractAttr(html.match(/<link[^>]+rel\s*=\s*["']canonical["'][^>]*>/i)?.[0] || '', 'href');
+      const ogUrl = metaContent(html, 'og:url');
+      assert.ok(canonical && canonical.startsWith(SITE), `${rel}: canonical must start with ${SITE}`);
+      assert.ok(ogUrl && ogUrl.startsWith(SITE), `${rel}: og:url must start with ${SITE}`);
+      assert.doesNotMatch(html, /nithinlabs\.com/i, `${rel}: still references nithinlabs.com`);
+      assert.doesNotMatch(html, /@nithinlabs\.com/i, `${rel}: still uses @nithinlabs.com email`);
+    }
+
+    assert.match(read('sitemap.xml'), /https:\/\/nithinlabs\.tech\//);
+    assert.doesNotMatch(read('sitemap.xml'), /nithinlabs\.com/);
+    assert.match(read('robots.txt'), /https:\/\/nithinlabs\.tech\/sitemap\.xml/);
+
+    const home = read('index.html');
+    assert.match(home, /"url"\s*:\s*"https:\/\/nithinlabs\.tech"/);
+    assert.match(home, /"email"\s*:\s*"hello@nithinlabs\.tech"/);
+
+    // Source files that must not keep the old domain (exclude design-reference comments)
+    const sources = [
+      'scripts/generate-site.mjs',
+      'assets/js/main.js',
+      'robots.txt',
+      'sitemap.xml',
+    ];
+    for (const src of sources) {
+      const text = read(src);
+      const withoutComments = text
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+      assert.doesNotMatch(
+        withoutComments,
+        /https?:\/\/nithinlabs\.com|@nithinlabs\.com|['"]https:\/\/nithinlabs\.com['"]/,
+        `${src}: still references nithinlabs.com outside comments`
+      );
+    }
   });
 });
 
