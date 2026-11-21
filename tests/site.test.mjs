@@ -535,6 +535,32 @@ describe('scroll interactions and mobile polish', () => {
     }
   });
 
+  it('does not auto-scroll the page on load via scrollIntoView; pins load to top', () => {
+    const main = read('assets/js/main.js');
+    // Mobile tab centering must never call scrollIntoView — that scrolls the document on iOS/Android.
+    assert.doesNotMatch(
+      main,
+      /scrollIntoView\s*\(/,
+      'main.js must not call scrollIntoView (it scrolls the whole page on mobile load)'
+    );
+    assert.match(
+      main,
+      /scrollRestoration\s*=\s*['"]manual['"]/,
+      'must set history.scrollRestoration = "manual" so the browser does not restore mid-page'
+    );
+    assert.match(
+      main,
+      /scrollTo\s*\(\s*0\s*,\s*0\s*\)|scrollTo\s*\(\s*\{\s*top:\s*0/,
+      'must scroll to top on load when there is no URL hash'
+    );
+    // Horizontal centering of the active tab chip is still required on mobile
+    assert.match(
+      main,
+      /scrollLeft/,
+      'mobile tab list should center the selected chip via scrollLeft only'
+    );
+  });
+
   it('home has an accessible mobile CTA and contact page does not', () => {
     const home = read('index.html');
     assert.match(home, /class=["'][^"']*mobile-cta[^"']*["']/i, 'home needs .mobile-cta');
@@ -886,5 +912,114 @@ describe('Referral programme', () => {
 
     const nav = navLinks(read('index.html'), 'header');
     assert.ok(nav && !nav.some((h) => h.includes('refer')), 'top nav must stay unchanged (no refer link)');
+  });
+});
+
+describe('Mobile polish', () => {
+  const MARKER = '/* MOBILE POLISH — max-width only; do not add desktop rules below */';
+
+  function cssRule(css, selector) {
+    const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const m = css.match(new RegExp(`(?:^|\\n)\\s*${esc}\\s*\\{([^}]*)\\}`));
+    return m ? m[1] : null;
+  }
+
+  /** Strip nested @media blocks (supports one level of nested rules). */
+  function stripMaxWidthMedia(css) {
+    return css.replace(/@media\s*\([^)]*max-width[^)]*\)\s*\{(?:[^{}]*\{[^}]*\})*[^{}]*\}/gi, '');
+  }
+
+  function mediaBlock(css, maxWidth) {
+    const re = new RegExp(
+      `@media\\s*\\([^)]*max-width:\\s*${maxWidth}px[^)]*\\)\\s*\\{((?:[^{}]*\\{[^}]*\\})*[^{}]*)\\}`,
+      'gi'
+    );
+    const blocks = [];
+    let m;
+    while ((m = re.exec(css)) !== null) blocks.push(m[1]);
+    return blocks.join('\n');
+  }
+
+  function propPx(rule, prop) {
+    if (!rule) return null;
+    const re = new RegExp(`${prop}\\s*:\\s*([\\d.]+)px`, 'i');
+    const m = rule.match(re);
+    return m ? Number(m[1]) : null;
+  }
+
+  it('has a mobile-polish marker block that is max-width only', () => {
+    const css = read('assets/css/styles.css');
+    const idx = css.indexOf(MARKER);
+    assert.ok(idx !== -1, `missing marker comment: ${MARKER}`);
+    const after = css.slice(idx + MARKER.length);
+    const remainder = stripMaxWidthMedia(after)
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\s+/g, '')
+      .trim();
+    assert.equal(
+      remainder,
+      '',
+      `after the marker, only max-width media queries are allowed; leftover:\n${remainder.slice(0, 200)}`
+    );
+  });
+
+  it('compacts service tabs at max-width 959px with a 44px tap target', () => {
+    const css = read('assets/css/styles.css');
+    const block = mediaBlock(css, 959);
+    assert.ok(block.length > 0, 'missing @media (max-width: 959px) block');
+
+    const tab = cssRule(block, '.tab');
+    const title = cssRule(block, '.tab-title');
+    const num = cssRule(block, '.tab-num');
+    const hit = cssRule(block, '.tab::before') || cssRule(block, '.tab:before');
+
+    assert.ok(tab, '959px block needs .tab rule');
+    const height = propPx(tab, 'height');
+    assert.ok(height !== null && height <= 36, `.tab height must be <= 36px, got ${height}`);
+
+    assert.ok(title, '959px block needs .tab-title rule');
+    const titleSize = propPx(title, 'font-size');
+    assert.ok(titleSize !== null && titleSize <= 14, `.tab-title must be <= 14px, got ${titleSize}`);
+
+    assert.ok(num, '959px block needs .tab-num rule');
+    const numSize = propPx(num, 'font-size');
+    assert.ok(numSize !== null && numSize <= 11, `.tab-num must be <= 11px, got ${numSize}`);
+
+    assert.ok(hit, '959px block needs .tab::before hit area');
+    assert.match(hit, /inset\s*:/i, '.tab::before must expand the tap target via inset');
+  });
+
+  it('compacts chips, spacing and rows at max-width 720px', () => {
+    const css = read('assets/css/styles.css');
+    const block = mediaBlock(css, 720);
+    assert.ok(block.length > 0, 'missing @media (max-width: 720px) block');
+
+    for (const sel of ['.chips label', '.chip-link', '.section', '.svc-row']) {
+      const rule = cssRule(block, sel);
+      assert.ok(rule, `720px block needs a ${sel} rule`);
+    }
+  });
+
+  it('does not change desktop base rules for tabs, chips, section or svc-row', () => {
+    const css = read('assets/css/styles.css');
+    // Remove ALL @media blocks so we only see top-level base rules
+    const topLevel = css.replace(/@media[^{]*\{(?:[^{}]*\{[^}]*\})*\s*\}/g, '');
+
+    const expect = {
+      '.tab': /padding:\s*0\.65rem\s+1rem/,
+      '.tab-list': /gap:\s*0\.5rem/,
+      '.tab-title': /font-size:\s*15px/,
+      '.tab-num': /font-size:\s*12px/,
+      '.chips label': /font-size:\s*14px/,
+      '.chip-link': /font-size:\s*13\.5px/,
+      '.section': /padding:\s*clamp\(4rem/,
+      '.svc-row': /padding:\s*1\.5rem/,
+    };
+
+    for (const [sel, re] of Object.entries(expect)) {
+      const rule = cssRule(topLevel, sel);
+      assert.ok(rule, `missing top-level ${sel}`);
+      assert.match(rule, re, `top-level ${sel} must keep desktop value (${re})`);
+    }
   });
 });

@@ -10,6 +10,20 @@
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var finePointer = window.matchMedia('(pointer: fine)').matches;
 
+  /* Always open at the top unless the URL has a hash target */
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  var pinToTop = function () {
+    if (window.location.hash) return;
+    window.scrollTo(0, 0);
+  };
+  pinToTop();
+  window.addEventListener('load', pinToTop);
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) pinToTop();
+  });
+
   function onVisible(el, cb, threshold) {
     if (!('IntersectionObserver' in window)) {
       cb();
@@ -319,11 +333,18 @@
     window.addEventListener('resize', syncCta, { passive: true });
   }
 
-  /* Mobile tabs: keep selected chip in view */
+  /* Mobile tabs: center selected chip horizontally without scrolling the page */
+  function centerTabInList(list, tab) {
+    if (!list || !tab) return;
+    var target =
+      tab.offsetLeft - (list.clientWidth / 2) + (tab.offsetWidth / 2);
+    var max = Math.max(0, list.scrollWidth - list.clientWidth);
+    list.scrollLeft = Math.max(0, Math.min(max, target));
+  }
   document.querySelectorAll('[data-tabs] .tab-list').forEach(function (list) {
     var selected = list.querySelector('[aria-selected="true"]');
-    if (selected && selected.scrollIntoView && window.matchMedia('(max-width: 959px)').matches) {
-      selected.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+    if (selected && window.matchMedia('(max-width: 959px)').matches) {
+      centerTabInList(list, selected);
     }
   });
 

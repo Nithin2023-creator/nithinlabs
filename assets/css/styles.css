@@ -4208,3 +4208,223 @@ h1 .word > span {
     display: none !important;
   }
 }
+
+/* MOBILE POLISH — max-width only; do not add desktop rules below */
+
+@media (max-width: 959px) {
+  .tab-list {
+    gap: 0.4rem;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    scroll-padding-inline: 1.25rem;
+  }
+
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 34px;
+    min-height: 0;
+    padding: 0 0.8rem;
+    grid-template-columns: none;
+  }
+
+  .tab::before {
+    content: "";
+    position: absolute;
+    inset: -5px 0;
+  }
+
+  .tab-num {
+    font-size: 10.5px;
+  }
+
+  .tab-title {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 720px) {
+  .container {
+    width: min(100% - 2rem, var(--container));
+  }
+
+  .section {
+    padding: 3rem 0;
+  }
+
+  .sec-head {
+    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .sec-head p,
+  .connected-lead {
+    font-size: 15.5px;
+  }
+
+  .hero-grid {
+    gap: 2rem;
+  }
+
+  .hero-kicker {
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    padding: 7px 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .hero-sub {
+    margin: 1.1rem 0 1.5rem;
+    font-size: 1.02rem;
+  }
+
+  .hero-points {
+    gap: 0.45rem 1rem;
+    margin-top: 1.5rem;
+    font-size: 12px;
+  }
+
+  .btn {
+    height: 42px;
+    padding: 0 1rem;
+    font-size: 14.5px;
+  }
+
+  .svc-row {
+    grid-template-columns: 36px 1fr 16px;
+    gap: 0.8rem;
+    padding: 1rem 1.1rem;
+  }
+
+  .svc-row .icon-box,
+  .icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .svc-row h3 {
+    font-size: 15px;
+  }
+
+  .svc-row p {
+    font-size: 13.5px;
+  }
+
+  .chips label {
+    gap: 0.3rem;
+    padding: 0.4rem 0.7rem;
+    font-size: 13px;
+  }
+
+  .chips label::before {
+    font-size: 12px;
+  }
+
+  .chip-link {
+    gap: 0.3rem;
+    padding: 0.3rem 0.65rem;
+    font-size: 12.5px;
+  }
+
+  .expertise-row {
+    gap: 0.65rem 0.75rem;
+    padding: 1.05rem 0.15rem;
+  }
+
+  .expertise-row .expertise-title {
+    font-size: clamp(1.05rem, 0.95rem + 1.2vw, 1.35rem);
+  }
+
+  .tag {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  .door {
+    padding: 1rem 0.8rem 0.95rem;
+    gap: 0.5rem;
+  }
+
+  .door-value {
+    font-size: clamp(1.7rem, 1.35rem + 2.2vw, 2.4rem);
+  }
+
+  .door-label {
+    font-size: 10px;
+  }
+
+  .door-caption {
+    font-size: 11px;
+  }
+
+  .flow-item {
+    flex-basis: min(72vw, 250px);
+    padding: 0.85rem;
+  }
+
+  .flow-item strong {
+    font-size: 14px;
+  }
+
+  .flow-item p {
+    font-size: 13px;
+  }
+
+  .page-hero {
+    padding: clamp(2rem, 5vw, 2.75rem) 0 clamp(2rem, 5vw, 2.75rem);
+  }
+
+  .filter-bar {
+    margin-top: 1.35rem;
+    gap: 0.75rem;
+  }
+
+  .pillar {
+    gap: 1.15rem;
+    padding: 2rem 0;
+  }
+
+  .pillar-aside h2 {
+    margin: 0.65rem 0 0.45rem;
+  }
+
+  .ind-block {
+    gap: 0.75rem;
+    padding: 1.75rem 0;
+  }
+
+  .ind-block h2 {
+    font-size: clamp(1.35rem, 1.15rem + 1vw, 1.7rem);
+  }
+
+  .case {
+    gap: 1rem;
+    padding: 1.35rem;
+  }
+
+  .case h2 {
+    font-size: 19px;
+  }
+
+  .form {
+    gap: 1.1rem;
+    padding: 1.15rem;
+  }
+
+  .estimate {
+    padding: 0.7rem 0.85rem;
+    font-size: 12px;
+  }
+
+  .demo-body {
+    padding: 0.85rem;
+  }
+
+  .tab-list {
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
+  }
+}
